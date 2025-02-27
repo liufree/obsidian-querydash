@@ -1,12 +1,9 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {Editor, MarkdownView, Notice, Plugin} from 'obsidian';
 import SampleSettingTab from './components/SampleSettingTab';
 import SampleModal from "./components/SampleModal";
-// Remember to rename these classes and interfaces!
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { createRoot } from 'react-dom/client';
-import {Memos} from "./sample";
-import { MEMOS_VIEW_TYPE } from './constants';
+
+import {SampleView} from "./sampleView";
+import {SAMPLE_VIEW_TYPE} from './constants';
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -22,7 +19,7 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.registerView(MEMOS_VIEW_TYPE, (leaf) => new Memos(leaf, this));
+		this.registerView(SAMPLE_VIEW_TYPE, (leaf) => new SampleView(leaf, this));
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -101,15 +98,13 @@ export default class MyPlugin extends Plugin {
 
 	async openMemos() {
 		const workspace = this.app.workspace;
-		workspace.detachLeavesOfType(MEMOS_VIEW_TYPE);
+		workspace.detachLeavesOfType(SAMPLE_VIEW_TYPE);
 		// const leaf = workspace.getLeaf(
 		//   !Platform.isMobile && workspace.activeLeaf && workspace.activeLeaf.view instanceof FileView,
 		// );
 		const leaf = workspace.getLeaf(false);
-		await leaf.setViewState({ type: MEMOS_VIEW_TYPE });
+		await leaf.setViewState({ type: SAMPLE_VIEW_TYPE });
 		workspace.revealLeaf(leaf);
-
-
 
 	}
 }
