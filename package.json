@@ -14,8 +14,9 @@
 	"dependencies": {
 		"@ant-design/icons": "^5.0.1",
 		"@ant-design/pro-components": "^2.4.4",
-		"@umijs/max": "^4.4.5",
-		"antd": "^5.4.0"
+		"umi-request": "^1.4.0",
+		"antd": "^5.4.0",
+		"obsidian-dataview": "^0.5.67"
 	},
 	"devDependencies": {
 		"@types/node": "^16.11.6",

@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import type MyPlugin from './main';
 
 import FormDemo from "./pages/FormDemo";
+import TableDemo from "./pages/TableDemo";
 
 export class SampleView extends ItemView {
 	plugin: MyPlugin;
@@ -31,7 +32,7 @@ export class SampleView extends ItemView {
 
 	async onOpen(): Promise<void> {
 
-		this.sampleComponent = React.createElement(FormDemo);
+		this.sampleComponent = React.createElement(TableDemo);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		ReactDOM.render(this.sampleComponent, (this as any).contentEl);
