@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type MyPlugin from './main';
 
-import IndexPage from './pages/index';
+import FormDemo from "./pages/FormDemo";
 
 export class Memos extends ItemView {
   plugin: MyPlugin;
@@ -31,7 +31,7 @@ export class Memos extends ItemView {
 
   async onOpen(): Promise<void> {
 
-	  this.memosComponent = React.createElement(IndexPage);
+	  this.memosComponent = React.createElement(FormDemo);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ReactDOM.render(this.memosComponent, (this as any).contentEl);
