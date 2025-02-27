@@ -2,6 +2,11 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 import SampleSettingTab from './components/SampleSettingTab';
 import SampleModal from "./components/SampleModal";
 // Remember to rename these classes and interfaces!
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import {Memos} from "./sample";
+import { MEMOS_VIEW_TYPE } from './constants';
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -17,10 +22,13 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
+		this.registerView(MEMOS_VIEW_TYPE, (leaf) => new Memos(leaf, this));
+
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new Notice('This is a notice!');
+			this.openMemos();
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -89,6 +97,20 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	async openMemos() {
+		const workspace = this.app.workspace;
+		workspace.detachLeavesOfType(MEMOS_VIEW_TYPE);
+		// const leaf = workspace.getLeaf(
+		//   !Platform.isMobile && workspace.activeLeaf && workspace.activeLeaf.view instanceof FileView,
+		// );
+		const leaf = workspace.getLeaf(false);
+		await leaf.setViewState({ type: MEMOS_VIEW_TYPE });
+		workspace.revealLeaf(leaf);
+
+
+
 	}
 }
 
