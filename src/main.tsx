@@ -4,6 +4,12 @@ import SampleModal from "./components/SampleModal";
 
 import {SampleView} from "./sampleView";
 import {SAMPLE_VIEW_TYPE} from './constants';
+import React from "react";
+import AntdTableDemo from "./pages/AntdTableDemo";
+import TableDemo from "./pages/TableDemo";
+import {StrictMode} from 'react';
+import ReactDemo from "./pages/ReactDemo";
+import { Root, createRoot } from 'react-dom/client';
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -15,6 +21,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
+	root: Root | null = null;
 
 	async onload() {
 		await this.loadSettings();
@@ -82,6 +89,17 @@ export default class MyPlugin extends Plugin {
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		// 代码块中标注table的绘制成sampleView
+		this.registerMarkdownCodeBlockProcessor('sample', (source, el, ctx) => {
+		//	插入一个div
+			const container = el.createDiv();
+
+			// 创建一个 MarkdownRenderChild 实例
+			const reactComponent = new ReactDemo(container, source);
+			ctx.addChild(reactComponent);
+
+		});
 	}
 
 	onunload() {
@@ -103,7 +121,7 @@ export default class MyPlugin extends Plugin {
 		//   !Platform.isMobile && workspace.activeLeaf && workspace.activeLeaf.view instanceof FileView,
 		// );
 		const leaf = workspace.getLeaf(false);
-		await leaf.setViewState({ type: SAMPLE_VIEW_TYPE });
+		await leaf.setViewState({type: SAMPLE_VIEW_TYPE});
 		workspace.revealLeaf(leaf);
 
 	}

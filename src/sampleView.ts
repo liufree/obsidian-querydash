@@ -2,16 +2,18 @@ import {HoverPopover, ItemView, WorkspaceLeaf} from 'obsidian';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type MyPlugin from './main';
-import { createRoot } from 'react-dom/client';
+import { Root,createRoot } from 'react-dom/client';
 
 import FormDemo from "./pages/FormDemo";
 import TableDemo from "./pages/TableDemo";
 import AntdTableDemo from "./pages/AntdTableDemo";
 
+
 export class SampleView extends ItemView {
 	plugin: MyPlugin;
 	hoverPopover: HoverPopover | null;
 	private sampleComponent: React.ReactElement;
+	root: Root;
 
 	constructor(leaf: WorkspaceLeaf, plugin: MyPlugin) {
 		super(leaf);
@@ -35,12 +37,13 @@ export class SampleView extends ItemView {
 	async onOpen(): Promise<void> {
 
 		this.sampleComponent = React.createElement(AntdTableDemo);
-		const root = createRoot(this.contentEl as HTMLElement);
-		root.render(this.sampleComponent);
+		this.root = createRoot(this.contentEl as HTMLElement);
+		this.root.render(this.sampleComponent);
 
 	}
 
 	async onClose() {
 		// Nothing to clean up.
+		this.root.unmount();
 	}
 }
