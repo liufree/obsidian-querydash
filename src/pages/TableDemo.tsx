@@ -6,6 +6,7 @@ import {useEffect, useRef} from 'react';
 import React from 'react';
 import request from 'umi-request';
 import { getAPI } from 'obsidian-dataview';
+// import 'antd/dist/antd.css';
 
 export const waitTimePromise = async (time: number = 100) => {
 	return new Promise((resolve) => {
