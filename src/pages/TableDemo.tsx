@@ -5,7 +5,8 @@ import {Button, Dropdown, Space, Tag} from 'antd';
 import {useEffect, useRef} from 'react';
 import React from 'react';
 import request from 'umi-request';
-import { getAPI } from 'obsidian-dataview';
+import {getAPI} from 'obsidian-dataview';
+import {App,Workspace} from "obsidian";
 
 export const waitTimePromise = async (time: number = 100) => {
 	return new Promise((resolve) => {
@@ -39,37 +40,11 @@ type GithubIssueItem = {
 	text: string;
 };
 
-const columns: ProColumns<GithubIssueItem>[] = [
-	{
-		dataIndex: 'index',
-		valueType: 'indexBorder',
-		width: 48,
-	},
-	{
-		title: '标题',
-		render: (_, record) => (
-			<Space>
-				{record.header.path}
-			</Space>
-		),
-	},
-	{
-		title: '文本',
-		dataIndex: 'text',
-		filters: true,
-		onFilter: true,
-		ellipsis: true,
-		render: (_, record) => (
-			console.log("record",record),
-			<Space>
-				{record.text}
-			</Space>
 
-		),
-	},
-];
-
-export default () => {
+interface MyReactComponentProps {
+	app: any; // Obsidian的App对象
+}
+const MyReactComponent: React.FC<MyReactComponentProps> = ({ app }) => {
 	const actionRef = useRef<ActionType>();
 
 	const dataviewAPI = getAPI();
@@ -82,6 +57,44 @@ export default () => {
 		console.log("data",data);
 		setData(data);
 	}, []);
+
+	const columns: ProColumns<GithubIssueItem>[] = [
+		{
+			dataIndex: 'index',
+			valueType: 'indexBorder',
+			width: 48,
+		},
+		{
+			title: '标题',
+			render: (_, record) => (
+				console.log("record",_),
+					<a onClick={()=>{
+						// 调用 Obsidian API
+						const file = app.vault.getAbstractFileByPath(record.header.path);
+						if (file) {
+							app.workspace.activeLeaf?.openFile(file);
+						}
+					}} >
+						{record.header.path}
+					</a>
+
+			),
+		},
+		{
+			title: '文本',
+			dataIndex: 'text',
+			filters: true,
+			onFilter: true,
+			ellipsis: true,
+			render: (_, record) => (
+				console.log("record",record),
+					<Space>
+						{record.text}
+					</Space>
+
+			),
+		},
+	];
 
 	return (
 		<ProTable<GithubIssueItem>
@@ -167,3 +180,4 @@ export default () => {
 		/>
 	);
 };
+export default MyReactComponent;

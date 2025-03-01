@@ -96,7 +96,7 @@ export default class MyPlugin extends Plugin {
 			const container = el.createDiv();
 
 			// 创建一个 MarkdownRenderChild 实例
-			const reactComponent = new ReactDemo(container, source);
+			const reactComponent = new ReactDemo(container, source,this.app);
 			ctx.addChild(reactComponent);
 
 		});

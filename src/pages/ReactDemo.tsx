@@ -10,10 +10,7 @@ export  default class ReactComponent extends MarkdownRenderChild {
 	root: Root;
 	container: HTMLElement;
 
-
-
-
-	constructor(container: HTMLElement, private source: string) {
+	constructor(container: HTMLElement, private source: string, private app: App) {
         super(container);
 		this.container = container;
 	}
@@ -28,6 +25,6 @@ export  default class ReactComponent extends MarkdownRenderChild {
 
 		// 使用 createRoot 渲染 React 组件
 		const root = createRoot(this.container);
-		root.render(<TableDemo  />);
+		root.render(<TableDemo app={this.app}   />);
 	}
 }
