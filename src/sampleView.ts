@@ -2,9 +2,11 @@ import {HoverPopover, ItemView, WorkspaceLeaf} from 'obsidian';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type MyPlugin from './main';
+import { createRoot } from 'react-dom/client';
 
 import FormDemo from "./pages/FormDemo";
 import TableDemo from "./pages/TableDemo";
+import AntdTableDemo from "./pages/AntdTableDemo";
 
 export class SampleView extends ItemView {
 	plugin: MyPlugin;
@@ -32,10 +34,10 @@ export class SampleView extends ItemView {
 
 	async onOpen(): Promise<void> {
 
-		this.sampleComponent = React.createElement(TableDemo);
+		this.sampleComponent = React.createElement(AntdTableDemo);
+		const root = createRoot(this.contentEl as HTMLElement);
+		root.render(this.sampleComponent);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		ReactDOM.render(this.sampleComponent, (this as any).contentEl);
 	}
 
 	async onClose() {
