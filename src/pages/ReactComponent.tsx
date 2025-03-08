@@ -1,12 +1,10 @@
-import {App, Plugin, MarkdownRenderChild} from 'obsidian';
+import {App, MarkdownRenderChild} from 'obsidian';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import TableDemo from "./tableview/TableDemo";
-import AntdTableDemo from "./AntdTableDemo";
 import {createRoot, Root} from "react-dom/client";
+import QueryDashView from "./QueryDashView";
 
 export  default class ReactComponent extends MarkdownRenderChild {
-	private sampleComponent: React.ReactElement;
 	root: Root;
 	container: HTMLElement;
 
@@ -16,15 +14,11 @@ export  default class ReactComponent extends MarkdownRenderChild {
 	}
 
 	onload() {
-		// 渲染 React 组件
 		this.renderReactComponent();
 	}
 
 	renderReactComponent() {
-		// 使用 ReactDOM.render 渲染 React 组件
-
-		// 使用 createRoot 渲染 React 组件
 		const root = createRoot(this.container);
-		root.render(<TableDemo app={this.app} source={this.source}   />);
+		root.render(<QueryDashView app={this.app} source={this.source}   />);
 	}
 }

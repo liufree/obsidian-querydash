@@ -1,13 +1,9 @@
 import {EllipsisOutlined, PlusOutlined} from '@ant-design/icons';
 import type {ActionType, ProColumns} from '@ant-design/pro-components';
-import {ProTable, TableDropdown} from '@ant-design/pro-components';
-import {Button, Dropdown, Space, Tag} from 'antd';
-import {useEffect, useRef} from 'react';
-import React from 'react';
-import request from 'umi-request';
-import { getAPI} from 'obsidian-dataview';
-import {App, Workspace} from "obsidian";
-import {continuedIndent} from "@codemirror/language";
+import {ProTable} from '@ant-design/pro-components';
+import {Button, Dropdown, Space} from 'antd';
+import React, {useEffect, useRef} from 'react';
+import {getAPI} from 'obsidian-dataview';
 
 export const waitTimePromise = async (time: number = 100) => {
 	return new Promise((resolve) => {

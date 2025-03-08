@@ -1,15 +1,7 @@
-import {Editor, MarkdownView, Notice, Plugin} from 'obsidian';
+import {Plugin} from 'obsidian';
 import SampleSettingTab from './components/SampleSettingTab';
-import SampleModal from "./components/SampleModal";
-
-import {SampleView} from "./sampleView";
-import {SAMPLE_VIEW_TYPE} from './constants';
-import React from "react";
-import AntdTableDemo from "./pages/AntdTableDemo";
-import TableDemo from "./pages/tableview/TableDemo";
-import {StrictMode} from 'react';
-import ReactDemo from "./pages/ReactDemo";
-import {Root, createRoot} from 'react-dom/client';
+import ReactComponent from "./pages/ReactComponent";
+import {Root} from 'react-dom/client';
 
 interface MyPluginSettings {
 	//	mySetting: string;
@@ -36,7 +28,7 @@ export default class QueryDashPlugin extends Plugin {
 		this.registerMarkdownCodeBlockProcessor('querydash', (source, el, ctx) => {
 
 			const container = el.createDiv();
-			const reactComponent = new ReactDemo(container, source, this.app);
+			const reactComponent = new ReactComponent(container, source, this.app);
 			ctx.addChild(reactComponent);
 		});
 
