@@ -25,6 +25,6 @@ export  default class ReactComponent extends MarkdownRenderChild {
 
 		// 使用 createRoot 渲染 React 组件
 		const root = createRoot(this.container);
-		root.render(<TableDemo app={this.app}   />);
+		root.render(<TableDemo app={this.app} source={this.source}   />);
 	}
 }

@@ -92,6 +92,10 @@ export default class MyPlugin extends Plugin {
 
 		// 代码块中标注table的绘制成sampleView
 		this.registerMarkdownCodeBlockProcessor('sample', (source, el, ctx) => {
+
+			console.log("start")
+			console.log('source',source)
+			console.log('ctx',ctx)
 		//	插入一个div
 			const container = el.createDiv();
 
