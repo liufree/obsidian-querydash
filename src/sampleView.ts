@@ -1,21 +1,21 @@
 import {HoverPopover, ItemView, WorkspaceLeaf} from 'obsidian';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type MyPlugin from './main';
+import type QueryDashPlugin from './main';
 import { Root,createRoot } from 'react-dom/client';
 
 import FormDemo from "./pages/FormDemo";
-import TableDemo from "./pages/TableDemo";
+import TableDemo from "./pages/tableview/TableDemo";
 import AntdTableDemo from "./pages/AntdTableDemo";
 
 
 export class SampleView extends ItemView {
-	plugin: MyPlugin;
+	plugin: QueryDashPlugin;
 	hoverPopover: HoverPopover | null;
 	private sampleComponent: React.ReactElement;
 	root: Root;
 
-	constructor(leaf: WorkspaceLeaf, plugin: MyPlugin) {
+	constructor(leaf: WorkspaceLeaf, plugin: QueryDashPlugin) {
 		super(leaf);
 		this.plugin = plugin;
 	}

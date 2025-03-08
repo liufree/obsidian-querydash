@@ -1,7 +1,7 @@
 import {App, Plugin, MarkdownRenderChild} from 'obsidian';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import TableDemo from "./TableDemo";
+import TableDemo from "./tableview/TableDemo";
 import AntdTableDemo from "./AntdTableDemo";
 import {createRoot, Root} from "react-dom/client";
 
