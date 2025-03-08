@@ -1,6 +1,5 @@
 import {App, MarkdownRenderChild} from 'obsidian';
 import * as React from 'react';
-import TableDemo from "./tableview/TableDemo";
 import {createRoot, Root} from "react-dom/client";
 import QueryDashView from "./QueryDashView";
 

@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {App} from "obsidian";
-import TableDemo from "./tableview/TableDemo";
+import TableDemo from "./tableview/TableView";
 
 
 interface QueryDashViewDashs {

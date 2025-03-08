@@ -4,38 +4,11 @@ import {ProTable} from '@ant-design/pro-components';
 import {Button, Dropdown, Space} from 'antd';
 import React, {useEffect, useRef} from 'react';
 import {getAPI} from 'obsidian-dataview';
+import {sineOut} from "svelte/easing";
+import {Values} from "obsidian-dataview/lib/data-model/value";
+import {formatValue, standardizeValues} from "./GenerateColumns";
 
-export const waitTimePromise = async (time: number = 100) => {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve(true);
-		}, time);
-	});
-};
 
-export const waitTime = async (time: number = 100) => {
-	await waitTimePromise(time);
-};
-
-type GithubIssueItem = {
-	url: string;
-	id: number;
-	number: number;
-	title: string;
-	labels: {
-		name: string;
-		color: string;
-	}[];
-	state: string;
-	comments: number;
-	created_at: string;
-	updated_at: string;
-	closed_at?: string;
-	header: {
-		path: string;
-	},
-	text: string;
-};
 
 
 interface MyReactComponentProps {
@@ -43,19 +16,78 @@ interface MyReactComponentProps {
 	source: string; // 当前文件的路径
 }
 
-const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
+
+const TableView: React.FC<MyReactComponentProps> = ({app, source}) => {
 	const actionRef = useRef<ActionType>();
+
+	const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
 
 	const dv = getAPI(app);
 
-	const [data, setData] = React.useState<GithubIssueItem[]>([]);
+	const formatMessage = (value: any) => {
+		// 如果value是日期类型
+		const res = formatValue(value);
 
-	function parseTableResult(value: any, params:any): Array<Record<string, any>> {
+		return res
+	}
+
+	const createColumns = (headers: string[]) => {
+		console.log("headers文档", headers);
+
+		const columns: ProColumns<any>[] = headers.map((header) => {
+
+			return {
+				title: header,
+				dataIndex: header,
+				valueType: 'text',
+				render: (_, record) => {
+					const {type,path, display} = record[header];
+					console.log("record", record);
+					console.log("record.type", type);
+					console.log("record.path", path);
+					console.log("record.display", display);
+					if(type === "datetime") {
+						return display;
+					}
+					if(type === "link") {
+						return <a onClick={() => {
+							const file = app.vault.getAbstractFileByPath(path);
+							if (file) {
+								app.workspace.activeLeaf?.openFile(file);
+							}
+						}}>
+							{display}
+						</a>
+					}
+					if(type === "array") {
+						return display.map((v) => {
+							if(typeof v === "object") {
+								return <a onClick={() => {
+									const file = app.vault.getAbstractFileByPath(v.path);
+									if (file) {
+										app.workspace.activeLeaf?.openFile(file);
+									}
+								}}>
+									{v.display}
+								</a>
+							}
+							return v;
+						})
+					}
+					return display.toString();
+				}
+
+			};
+		});
+
+		return columns;
+	}
+
+	function parseTableResult(value: any, params: any): Array<Record<string, any>> {
 		const headers: string[] = value.headers;
-
+		console.log("headers", headers);
 		const rows: Array<Record<string, any>> = [];
 		console.log("params1", params);
-
 
 
 		value.values.forEach((row) => {
@@ -65,22 +97,25 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 			headers.forEach((header, index) => {
 
 				const searchParam = params[header];
-				console.log("searchParam",searchParam);
+				console.log("searchParam", searchParam);
 
 
 				const value = row[index];
 				// 如果字符串value中不包含searchParam，则排除
-				if(searchParam){
+				if (searchParam) {
 					flag[index] = value.indexOf(searchParam) > -1;
-				}else{
+				} else {
 					flag[index] = true;
 				}
 
-				console.log("header",header)
-				console.log("row.value",value)
-				values[header] = value;
+				console.log("header", header)
+				console.log("row.value", value)
+
+
+				const resValue = formatMessage(value);
+				values[header] = resValue;
 			});
-				rows.push(values);
+			rows.push(values);
 		});
 
 
@@ -97,7 +132,7 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 					// If item[key] is empty, return false directly.
 					if (item[key]) {
 						return item[key].toString().toLowerCase().includes(params[key].toString().toLowerCase());
-					}else{
+					} else {
 						return true;
 					}
 				}
@@ -113,7 +148,7 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 		return filteredData;
 	}
 
-	const  executeTableQuery=async (dvApi: any,source:any,params:any) => {
+	const executeTableQuery = async (dvApi: any, source: any, params: any) => {
 		// 定义查询语句
 		const sql = source;
 
@@ -123,9 +158,15 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 		console.log("Query Result1:", queryResult.successful);
 		console.log("Query Result2:", queryResult.value);
 
-		const tableData:any =parseTableResult(queryResult.value,params);
+		const tableData: any = parseTableResult(queryResult.value, params);
+
+		const headers: string[] = queryResult.value.headers;
 
 
+		const columns = createColumns(headers);
+
+
+		console.log("columns:", columns);
 		console.log("tableData:", tableData);
 
 		// 处理查询结果
@@ -139,20 +180,15 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 		} else {
 			console.error("Query failed:", queryResult.error);
 		}
-		return tableData;
+		return {tableData: tableData, columns: columns};
 
 	}
 
 	useEffect(() => {
-
-		//executeTableQuery(dv,source,{});
-		
-	//	const data = dv.pages().file.lists.values;
-		//console.log("data", data);
-	//	setData(data);
+		console.log("source", source);
 	}, []);
 
-	const columns: ProColumns<GithubIssueItem>[] = [
+	const columns1 = [
 		{
 			dataIndex: 'index',
 			valueType: 'indexBorder',
@@ -162,7 +198,7 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 			title: '标题',
 			dataIndex: 'file.name',
 			render: (_, record) => (
-				console.log("record,{},text", _,record),
+				console.log("record,{},text", _, record),
 					<a onClick={() => {
 						// 调用 Obsidian API
 						const file = app.vault.getAbstractFileByPath(record.File.path);
@@ -206,14 +242,15 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 	];
 
 	return (
-		<ProTable<GithubIssueItem>
-			columns={columns}
+		<ProTable
+			scroll={{x: 'max-content'}}
 			actionRef={actionRef}
 			cardBordered
 			editable={{
 				type: 'multiple',
 			}}
-		//	dataSource={data}
+			columns={columns}
+			//	dataSource={data}
 			columnsState={{
 				persistenceKey: 'pro-table-singe-demos',
 				persistenceType: 'localStorage',
@@ -246,57 +283,60 @@ const MyReactComponent: React.FC<MyReactComponentProps> = ({app, source}) => {
 				},
 			}}
 			pagination={{
-				pageSize: 5,
+				pageSize: 10,
 				onChange: (page) => console.log(page),
 			}}
-			dateFormatter="string"
 			headerTitle="高级表格"
 			request={async (params, sort, filter) => {
 				console.log('params:', params);
-				const response = await executeTableQuery(dv,source,params);
-				console.log("response1",response);
-				return {
-					data: response,
+				const response = await executeTableQuery(dv, source, params);
+				const {tableData, columns} = response;
+				console.log("columnsData", columns);
+				console.log("tableData", tableData);
+				setColumns(columns);
+				return Promise.resolve({
+					data: tableData,
 					success: true,
-					total: response.length,
-				};
+					total: tableData.length,
+					//	columns: columns,
+				});
 			}}
 			toolBarRender={() => [
-				<Button
-					key="button"
-					icon={<PlusOutlined/>}
-					onClick={() => {
-						actionRef.current?.reload();
-					}}
-					type="primary"
-				>
-					新建
-				</Button>,
-				<Dropdown
-					key="menu"
-					menu={{
-						items: [
-							{
-								label: '1st item',
-								key: '1',
-							},
-							{
-								label: '2nd item',
-								key: '2',
-							},
-							{
-								label: '3rd item',
-								key: '3',
-							},
-						],
-					}}
-				>
-					<Button>
-						<EllipsisOutlined/>
-					</Button>
-				</Dropdown>,
+				// <Button
+				// 	key="button"
+				// 	icon={<PlusOutlined/>}
+				// 	onClick={() => {
+				// 		actionRef.current?.reload();
+				// 	}}
+				// 	type="primary"
+				// >
+				// 	新建
+				// </Button>,
+				// <Dropdown
+				// 	key="menu"
+				// 	menu={{
+				// 		items: [
+				// 			{
+				// 				label: '1st item',
+				// 				key: '1',
+				// 			},
+				// 			{
+				// 				label: '2nd item',
+				// 				key: '2',
+				// 			},
+				// 			{
+				// 				label: '3rd item',
+				// 				key: '3',
+				// 			},
+				// 		],
+				// 	}}
+				// >
+				// 	<Button>
+				// 		<EllipsisOutlined/>
+				// 	</Button>
+				// </Dropdown>,
 			]}
 		/>
 	);
 };
-export default MyReactComponent;
+export default TableView;
