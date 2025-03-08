@@ -1,14 +1,9 @@
-import {EllipsisOutlined, PlusOutlined} from '@ant-design/icons';
 import type {ActionType, ProColumns} from '@ant-design/pro-components';
 import {ProTable} from '@ant-design/pro-components';
-import {Button, Dropdown, Space} from 'antd';
+import {Space, List} from 'antd';
 import React, {useEffect, useRef} from 'react';
 import {getAPI} from 'obsidian-dataview';
-import {sineOut} from "svelte/easing";
-import {Values} from "obsidian-dataview/lib/data-model/value";
-import {formatValue, standardizeValues} from "./GenerateColumns";
-
-
+import {formatValue} from "./GenerateColumns";
 
 
 interface MyReactComponentProps {
@@ -24,32 +19,27 @@ const TableView: React.FC<MyReactComponentProps> = ({app, source}) => {
 
 	const dv = getAPI(app);
 
-	const formatMessage = (value: any) => {
-		// 如果value是日期类型
-		const res = formatValue(value);
-
-		return res
-	}
-
 	const createColumns = (headers: string[]) => {
-		console.log("headers文档", headers);
+		let columns = [];
+		const firstColumn: ProColumns<any> = {
+			dataIndex: 'index',
+			valueType: 'indexBorder',
+			title:'index',
+		};
 
-		const columns: ProColumns<any>[] = headers.map((header) => {
+		columns.push(firstColumn);
+		const dynamicColumns: ProColumns<any>[] = headers.map((header) => {
 
 			return {
 				title: header,
 				dataIndex: header,
-				valueType: 'text',
 				render: (_, record) => {
-					const {type,path, display} = record[header];
-					console.log("record", record);
-					console.log("record.type", type);
-					console.log("record.path", path);
-					console.log("record.display", display);
-					if(type === "datetime") {
+					const {type, path, display} = record[header];
+
+					if (type === "datetime") {
 						return display;
 					}
-					if(type === "link") {
+					if (type === "link") {
 						return <a onClick={() => {
 							const file = app.vault.getAbstractFileByPath(path);
 							if (file) {
@@ -59,17 +49,19 @@ const TableView: React.FC<MyReactComponentProps> = ({app, source}) => {
 							{display}
 						</a>
 					}
-					if(type === "array") {
+					if (type === "array") {
 						return display.map((v) => {
-							if(typeof v === "object") {
-								return <a onClick={() => {
-									const file = app.vault.getAbstractFileByPath(v.path);
-									if (file) {
-										app.workspace.activeLeaf?.openFile(file);
-									}
-								}}>
-									{v.display}
-								</a>
+							if (typeof v === "object") {
+								return <List.Item>
+									<a onClick={() => {
+										const file = app.vault.getAbstractFileByPath(v.path);
+										if (file) {
+											app.workspace.activeLeaf?.openFile(file);
+										}
+									}}>
+										{v.display}
+									</a>
+								</List.Item>
 							}
 							return v;
 						})
@@ -79,7 +71,7 @@ const TableView: React.FC<MyReactComponentProps> = ({app, source}) => {
 
 			};
 		});
-
+		columns.push(...dynamicColumns);
 		return columns;
 	}
 
@@ -93,26 +85,9 @@ const TableView: React.FC<MyReactComponentProps> = ({app, source}) => {
 		value.values.forEach((row) => {
 			const values: Record<string, any> = {};
 
-			let flag = []
 			headers.forEach((header, index) => {
-
-				const searchParam = params[header];
-				console.log("searchParam", searchParam);
-
-
 				const value = row[index];
-				// 如果字符串value中不包含searchParam，则排除
-				if (searchParam) {
-					flag[index] = value.indexOf(searchParam) > -1;
-				} else {
-					flag[index] = true;
-				}
-
-				console.log("header", header)
-				console.log("row.value", value)
-
-
-				const resValue = formatMessage(value);
+				const resValue = formatValue(value);
 				values[header] = resValue;
 			});
 			rows.push(values);
