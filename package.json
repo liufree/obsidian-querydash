@@ -4,21 +4,33 @@
 	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
-		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"dev": "vite build --watch --mode development",
+		"build": "vite build",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
+	"dependencies": {
+		"@ant-design/icons": "^5.0.1",
+		"@ant-design/pro-components": "^2.4.4",
+		"umi-request": "^1.4.0"
+	},
 	"devDependencies": {
-		"@types/node": "^16.11.6",
+		"@types/luxon": "^3.4.2",
+		"@types/node": "^22.13.8",
+		"@types/react": "^18.0.33",
+		"@types/react-dom": "^18.0.11",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
+		"@vitejs/plugin-react": "^4.3.4",
 		"builtin-modules": "3.3.0",
-		"esbuild": "0.17.3",
+		"husky": "^9",
+		"lint-staged": "^13.2.0",
 		"obsidian": "latest",
+		"obsidian-dataview": "^0.5.67",
 		"tslib": "2.4.0",
-		"typescript": "4.7.4"
+		"vite": "^6.2.0",
+		"vite-plugin-css-injected-by-js": "^3.5.2"
 	}
 }
