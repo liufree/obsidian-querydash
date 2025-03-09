@@ -7,6 +7,7 @@ export function formatValue(
 	if (!value) {
 		return;
 	}
+	console.log("format value", value);
 	if (Array.isArray(value)) {
 		value.map((v) => (typeof v === "object" ? formatObject(v) : v));
 		res = {type: "array", display: value};

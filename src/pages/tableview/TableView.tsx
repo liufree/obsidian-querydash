@@ -59,8 +59,12 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 										{v.display}
 									</a>
 								</List.Item>
+							} else {
+								// tags
+								return <List.Item>
+									{v}
+								</List.Item>
 							}
-							return v;
 						})
 					}
 					return display.toString();
@@ -74,6 +78,8 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 	function parseTableResult(value: any, params: any): Array<Record<string, any>> {
 		const headers: string[] = value.headers;
 		console.log("headers", headers);
+	//	console.log("valueData", value);
+
 		const rows: Array<Record<string, any>> = [];
 
 		value.values.forEach((row: any) => {
@@ -89,7 +95,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 		delete params.current;
 		delete params.pageSize;
 
-		//	console.log("rowsData", rows);
+		// console.log("rowsData", rows);
 		//	console.log("paramsData", params);
 
 		const filteredData = rows.filter(item => {
