@@ -3,7 +3,7 @@ import {ProTable} from '@ant-design/pro-components';
 import {Space, List} from 'antd';
 import React, {useEffect, useRef} from 'react';
 import {getAPI} from 'obsidian-dataview';
-import {formatValue} from "./GenerateColumns";
+import {formatValue} from "../GenerateColumns";
 
 
 interface MyReactComponentProps {
@@ -25,6 +25,7 @@ const TableView: React.FC<MyReactComponentProps> = ({app, source}) => {
 			dataIndex: 'index',
 			valueType: 'indexBorder',
 			title:'index',
+			sorter: true,
 		};
 
 		columns.push(firstColumn);
@@ -33,6 +34,7 @@ const TableView: React.FC<MyReactComponentProps> = ({app, source}) => {
 			return {
 				title: header,
 				dataIndex: header,
+				sorter: true,
 				render: (_, record) => {
 					const {type, path, display} = record[header];
 

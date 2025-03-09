@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import {App} from "obsidian";
-import TableDemo from "./tableview/TableView";
+import TableView from "./tableview/TableView";
+import ListView from "./listview/ListView";
 
 
 interface QueryDashViewDashs {
@@ -10,12 +11,19 @@ interface QueryDashViewDashs {
 
 const QueryDashView: React.FC<QueryDashViewDashs> = ({app, source}) => {
 
-	useEffect(() => {
 
+	const [sourceType, setSourceType] = React.useState<string>("table");
+
+	useEffect(() => {
+		// source如果是List开头，则sourceType为List，否则为Table
+		const sourceType = source.toLowerCase().startsWith("list") ? "list" : "table";
+		setSourceType(sourceType);
 	}, []);
 
-	return (
-		<TableDemo app={app} source={source}/>
-	);
+	if (sourceType === "table") {
+		return <TableView app={app} source={source}/>;
+	} else {
+		return <ListView app={app} source={source}/>;
+	}
 };
 export default QueryDashView;
