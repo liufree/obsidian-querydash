@@ -10,6 +10,10 @@ The goal of QueryDash is to develop an Obsidian plugin similar to Notion Databas
 	- **Aggregation**: Supports data summary statistics.
 	- **Pagination**: Optimizes browsing experience for large datasets.
 
+**language**
+- [English](README.md)
+- [简体中文](README-zh.md)
+
 **Tutorial**
 ![demo.gif](docs/demo.gif)
 
