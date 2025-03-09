@@ -19,7 +19,6 @@ export  default class ReactComponent extends MarkdownRenderChild {
 	}
 
 	renderReactComponent() {
-// 获取当前语言代码（例如：'en' 或 'zh'）
 
 		const root = createRoot(this.container);
 		root.render(<QueryDashView app={this.app} source={this.source}   />);

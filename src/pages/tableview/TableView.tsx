@@ -1,6 +1,6 @@
 import type {ActionType, ProColumns} from '@ant-design/pro-components';
 import {ProTable} from '@ant-design/pro-components';
-import {List} from 'antd';
+import {List, Tag} from 'antd';
 import React, {useEffect, useRef} from 'react';
 import {getAPI} from 'obsidian-dataview';
 import {formatValue} from "../GenerateColumns";
@@ -62,7 +62,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 							} else {
 								// tags
 								return <List.Item>
-									{v}
+									<Tag>{v}</Tag>
 								</List.Item>
 							}
 						})
@@ -78,7 +78,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 	function parseTableResult(value: any, params: any): Array<Record<string, any>> {
 		const headers: string[] = value.headers;
 		console.log("headers", headers);
-	//	console.log("valueData", value);
+		//	console.log("valueData", value);
 
 		const rows: Array<Record<string, any>> = [];
 
@@ -159,26 +159,8 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 			search={{
 				labelWidth: 'auto',
 			}}
-			options={{
-				setting: {
-					listsHeight: 400,
-				},
-			}}
-			form={{
-				// 由于配置了 transform，提交的参数与定义的不同这里需要转化一下
-				syncToUrl: (values, type) => {
-					if (type === 'get') {
-						return {
-							...values,
-							// created_at: [values.startTime, values.endTime],
-						};
-					}
-					return values;
-				},
-			}}
 			pagination={{
-				pageSize: 10,
-				onChange: (page) => console.log(page),
+				showSizeChanger: true,
 			}}
 			headerTitle="TablieView"
 			request={async (params, sort, filter) => {
