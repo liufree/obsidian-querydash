@@ -1,6 +1,4 @@
 import {ProList} from '@ant-design/pro-components';
-import {Button, Space, Tag} from 'antd';
-import request from 'umi-request';
 import React from "react";
 import {formatValue} from "../GenerateColumns";
 import {getAPI} from 'obsidian-dataview';
@@ -70,38 +68,23 @@ const ListView: React.FC<ViewProps> = ({app, source}) => {
 		// source是一个句子，将source的第一个单词List转成Table
 
 		const sql = replaceFirstWord(source);
-
 		// 使用 Dataview API 执行查询
 		const queryResult = await dvApi.query(sql);
-		console.log("Query List Result:", queryResult);
-		console.log("Query List Result1:", queryResult.successful);
-		console.log("Query List Result2:", queryResult.value);
-
 		const tableData: any = parseTableResult(queryResult.value, params);
-		console.log("Query List Result Data:", tableData);
-
 		return {tableData: tableData};
 
 	}
 
 
 	return <ProList
-		toolBarRender={() => {
-			return [
-				<Button key="3" type="primary">
-					新建2
-				</Button>,
-			];
-		}}
-		search={{}}
+	//	search={{}}
 		rowKey="name"
-		headerTitle="基础列表"
+		headerTitle="ListView"
 		request={async (params = {}) => {
-
-			console.log('params:', params);
+			// console.log('params:', params);
 			const response = await executeTableQuery(dv, source, params);
 			const {tableData} = response;
-			console.log("listData", tableData);
+		//	console.log("listData", tableData);
 			return Promise.resolve({
 				data: tableData,
 				success: true,
