@@ -4,25 +4,10 @@ import request from 'umi-request';
 import React from "react";
 import {formatValue} from "../GenerateColumns";
 import {getAPI} from 'obsidian-dataview';
-
-type GithubIssueItem = {
-	url: string;
-	id: number;
-	number: number;
-	title: string;
-	labels: {
-		name: string;
-		color: string;
-	}[];
-	state: string;
-	comments: number;
-	created_at: string;
-	updated_at: string;
-	closed_at?: string;
-};
+import {ViewProps} from "../../models/ViewProps";
 
 
-const ListView = ({app, source}) => {
+const ListView: React.FC<ViewProps> = ({app, source}) => {
 
 	const [metas, setMetas] = React.useState<any>({});
 
@@ -31,7 +16,7 @@ const ListView = ({app, source}) => {
 	function parseTableResult(value: any, params: any): Array<Record<string, any>> {
 		const headers: string[] = value.headers;
 		const rows: Array<Record<string, any>> = [];
-		value.values.forEach((row) => {
+		value.values.forEach((row: any) => {
 			const values: Record<string, any> = {};
 			headers.forEach((header, index) => {
 				const value = row[index];
@@ -100,11 +85,11 @@ const ListView = ({app, source}) => {
 	}
 
 
-	return <ProList<GithubIssueItem>
+	return <ProList
 		toolBarRender={() => {
 			return [
 				<Button key="3" type="primary">
-					新建
+					新建2
 				</Button>,
 			];
 		}}
@@ -131,7 +116,7 @@ const ListView = ({app, source}) => {
 		metas={{
 			title: {
 				title: 'title',
-				render: (_, record) => {
+				render: (_, record: any) => {
 					console.log("list record", record);
 					return <a>{record.File.path}</a>;
 				}

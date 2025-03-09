@@ -1,7 +1,4 @@
-
-import type {Link} from "obsidian-dataview";
 import dayjs from "dayjs";
-import React from "react";
 
 export function formatValue(
 	value: Record<string, any>
