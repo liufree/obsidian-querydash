@@ -6,6 +6,5 @@
 	"description": "This is a database search plugin for Obsidian",
 	"author": "lwx",
 	"authorUrl": "https://github.com/liufree/obsidian-querydash",
-	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
 }
