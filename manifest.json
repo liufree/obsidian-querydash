@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-querydash-plugin",
+	"name": "QueryDash",
 	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
+	"minAppVersion": "1.8.0",
+	"description": "This is a database search plugin for Obsidian",
+	"author": "lwx",
+	"authorUrl": "https://github.com/liufree/obsidian-querydash",
 	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
 }

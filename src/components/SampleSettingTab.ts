@@ -1,10 +1,10 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "../main";
+import QueryDashPlugin from "../main";
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: QueryDashPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: QueryDashPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
