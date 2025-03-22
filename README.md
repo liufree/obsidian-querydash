@@ -1,5 +1,7 @@
 **Project Objective**  
-The goal of QueryDash is to develop an Obsidian plugin similar to Notion Database, but not limited to database functionality. In the future, it will gradually expand with more practical features to help users manage knowledge, tasks, and life more efficiently.
+The goal of QueryDash is to develop an Obsidian plugin similar to Notion Database, but not limited to database functionality.
+**Since the API of Dataview is used, the Dataview plugin must be enabled.**
+In the future, it will gradually expand with more practical features to help users manage knowledge, tasks, and life more efficiently.
 
 **language**
 - [English](README.md)
@@ -15,10 +17,12 @@ The goal of QueryDash is to develop an Obsidian plugin similar to Notion Databas
 	- **Pagination**: Optimizes browsing experience for large datasets.
 
 **Tutorial**
-
-```querydash
-table file.name , file.outlinks as "links" ,file.ctime as "ctime",file.mtime as "mtime" ,file.tags as "tags" from #clippings
 ```
+```querydash
+table file.name , file.outlinks as "links" ,file.ctime as "ctime",
+file.mtime as "mtime" ,file.tags as "tags" from #clippings
+```
+````
 
 ![demo.gif](docs/demo.gif)
 

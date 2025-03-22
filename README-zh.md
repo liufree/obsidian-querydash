@@ -2,7 +2,9 @@
 
 
 **项目目标**  
-QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不仅限于数据库功能。未来将逐步扩展更多实用特性，帮助用户更高效地管理知识、任务和生活。
+QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不仅限于数据库功能。
+由于使用了dataview的api，必须启用dataview插件。
+未来将逐步扩展更多实用特性，帮助用户更高效地管理知识、任务和生活。
 
 **现有功能**
 1. **多视图支持**：提供表格和列表两种视图，满足不同场景需求。
@@ -15,8 +17,11 @@ QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不
 
 **使用教程**
 
+```
 ```querydash
-table file.name , file.outlinks as "links" ,file.ctime as "ctime",file.mtime as "mtime" ,file.tags as "tags" from #clippings
+table file.name , file.outlinks as "links" ,file.ctime as "ctime",
+file.mtime as "mtime" ,file.tags as "tags" from #clippings
+```
 ```
 ![demo.gif](docs/demo.gif)
 
