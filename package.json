@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-querydash",
 	"version": "1.0.0",
-	"description": "This is a database search plugin for Obsidian",
+	"description": "Refer to Dataview and add search, sorting, and pagination functions, just like Notion.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "vite build --watch --mode development",
