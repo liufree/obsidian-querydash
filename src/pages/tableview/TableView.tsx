@@ -77,7 +77,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 
 	function parseTableResult(value: any, params: any): Array<Record<string, any>> {
 		const headers: string[] = value.headers;
-		console.log("headers", headers);
+		// console.log("headers", headers);
 		//	console.log("valueData", value);
 
 		const rows: Array<Record<string, any>> = [];
@@ -131,7 +131,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 	}
 
 	useEffect(() => {
-		console.log("source", source);
+		//	console.log("source", source);
 	}, []);
 
 
@@ -152,7 +152,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 					option: {fixed: 'right', disable: true},
 				},
 				onChange(value) {
-					console.log('value: ', value);
+					//	console.log('value: ', value);
 				},
 			}}
 			rowKey="title"
@@ -164,7 +164,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 			}}
 			headerTitle="TablieView"
 			request={async (params, sort, filter) => {
-				console.log('params:', params);
+				//	console.log('params:', params);
 				const response = await executeTableQuery(dv, source, params);
 				const {tableData, columns} = response;
 

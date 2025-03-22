@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import moment from "moment";
 
 export function formatValue(
 	value: Record<string, any>
@@ -7,7 +7,7 @@ export function formatValue(
 	if (!value) {
 		return;
 	}
-	console.log("format value", value);
+//	console.log("format value", value);
 	if (Array.isArray(value)) {
 		value.map((v) => (typeof v === "object" ? formatObject(v) : v));
 		res = {type: "array", display: value};
@@ -27,11 +27,11 @@ function formatObject(value: any) {
 	}
 
 	if ("path" in value && "display" in value) {
-		console.log("link value", value);
+	//	console.log("link value", value);
 		return {type: "link", path: value.path, display: value.display};
 	}
 	if ("ts" in value) {
-		const display= dayjs(value.ts).format("YYYY-MM-DD HH:mm:ss");
+		const display= moment(value.ts).format("YYYY-MM-DD HH:mm:ss");
 		return {type: "datetime", display: display};
 	}
 }

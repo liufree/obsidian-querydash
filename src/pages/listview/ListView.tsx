@@ -18,9 +18,9 @@ const ListView: React.FC<ViewProps> = ({app, source}) => {
 			const values: Record<string, any> = {};
 			headers.forEach((header, index) => {
 				const value = row[index];
-				console.log("list value", value);
+			//	console.log("list value", value);
 				const resValue = formatValue(value);
-				console.log("list resValue", resValue);
+			//	console.log("list resValue", resValue);
 				values[header] = resValue;
 			});
 			rows.push(values);
@@ -29,7 +29,7 @@ const ListView: React.FC<ViewProps> = ({app, source}) => {
 		delete params.current;
 		delete params.pageSize;
 
-		console.log("list rows", rows);
+		// console.log("list rows", rows);
 
 		const filteredData = rows.filter(item => {
 			return Object.keys(params).every(key => {
@@ -100,7 +100,7 @@ const ListView: React.FC<ViewProps> = ({app, source}) => {
 			title: {
 				title: 'title',
 				render: (_, record: any) => {
-					console.log("list record", record);
+				//	console.log("list record", record);
 					return <a>{record.File.path}</a>;
 				}
 			},
