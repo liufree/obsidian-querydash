@@ -15,6 +15,11 @@ The goal of QueryDash is to develop an Obsidian plugin similar to Notion Databas
 	- **Pagination**: Optimizes browsing experience for large datasets.
 
 **Tutorial**
+
+```querydash
+table file.name , file.outlinks as "links" ,file.ctime as "ctime",file.mtime as "mtime" ,file.tags as "tags" from #clippings
+```
+
 ![demo.gif](docs/demo.gif)
 
 **Future Vision**
