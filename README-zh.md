@@ -14,7 +14,7 @@ QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不
 	- **分页**：优化大数据量下的浏览体验。
 
 **使用教程**
-s
+
 ```querydash
 table file.name , file.outlinks as "links" ,file.ctime as "ctime",file.mtime as "mtime" ,file.tags as "tags" from #clippings
 ```
