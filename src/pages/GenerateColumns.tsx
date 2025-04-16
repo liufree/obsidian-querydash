@@ -1,4 +1,3 @@
-import moment from "moment";
 
 export function formatValue(
 	value: Record<string, any>
@@ -31,7 +30,7 @@ function formatObject(value: any) {
 		return {type: "link", path: value.path, display: value.display};
 	}
 	if ("ts" in value) {
-		const display= moment(value.ts).format("YYYY-MM-DD HH:mm:ss");
+		const display= window.moment(value.ts).format("YYYY-MM-DD HH:mm:ss");
 		return {type: "datetime", display: display};
 	}
 }

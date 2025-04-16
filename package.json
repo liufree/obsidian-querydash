@@ -14,7 +14,6 @@
 	"dependencies": {
 		"@ant-design/icons": "^5.0.1",
 		"@ant-design/pro-components": "^2.4.4",
-		"moment": "^2.30.1",
 		"umi-request": "^1.4.0"
 	},
 	"devDependencies": {
