@@ -8,8 +8,8 @@ export function formatValue(
 	}
 //	console.log("format value", value);
 	if (Array.isArray(value)) {
-		value.map((v) => (typeof v === "object" ? formatObject(v) : v));
-		res = {type: "array", display: value};
+		const formattedValues = value.map((v) => (typeof v === "object" ? formatObject(v) : v));
+		res = {type: "array", display: formattedValues};
 	} else if (typeof value === "object") {
 		res = formatObject(value);
 	} else {
@@ -21,7 +21,7 @@ export function formatValue(
 function formatObject(value: any) {
 	const type =value.type;
 	if(type==='file') {
-		const fileName = value.path.split('/').pop()?.split('.')[0];
+		const fileName = value.path.replace(/\.md$/, '');
 		return {type: "link", path: value.path, display: fileName};
 	}
 
