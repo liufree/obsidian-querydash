@@ -30,7 +30,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 				dataIndex: header,
 				sorter: (a, b) => a[header].display.toString().localeCompare(b[header].display.toString()),
 				render: (_, record) => {
-					const {type, path, display} = record[header];
+					const {type, path, display} = record[header]|| {};
 					if (type === "datetime") {
 						return display;
 					}
@@ -67,7 +67,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 							}
 						})
 					}
-					return display.toString();
+					return display?.toString();
 				}
 			};
 		});
@@ -162,7 +162,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 			pagination={{
 				showSizeChanger: true,
 			}}
-			headerTitle="TablieView"
+			headerTitle="TableView"
 			request={async (params, sort, filter) => {
 				//	console.log('params:', params);
 				const response = await executeTableQuery(dv, source, params);
