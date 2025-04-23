@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-querydash",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Refer to Dataview and add search, sorting, and pagination functions, just like Notion.",
 	"main": "main.js",
 	"scripts": {
@@ -30,7 +30,7 @@
 		"obsidian": "latest",
 		"obsidian-dataview": "^0.5.67",
 		"tslib": "2.4.0",
-		"vite": "^6.2.0",
+		"vite": "^6.2.6",
 		"vite-plugin-css-injected-by-js": "^3.5.2"
 	}
 }
