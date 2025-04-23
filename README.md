@@ -9,7 +9,7 @@ In the future, it will gradually expand with more practical features to help use
 
 **Current Features**
 1. **Multi-view Support**: Provides table and list views to meet different scenario needs.
-2. **Dataview SQL Support**: Compatible with Dataview's SQL syntax (currently does not support `GROUP BY`).
+2. **Dataview SQL Support**: Compatible with Dataview's SQL syntax .
 3. **Enhanced Features**:
 	- **Search**: Quickly locate the content you need.
 	- **Filter**: Screen data based on conditions.
