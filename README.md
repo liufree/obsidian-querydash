@@ -3,12 +3,15 @@ The goal of QueryDash is to develop an Obsidian plugin similar to Notion Databas
 **Since the API of Dataview is used, the Dataview plugin must be enabled.**
 In the future, it will gradually expand with more practical features to help users manage knowledge, tasks, and life more efficiently.
 
+**If you are interested in this project, please consider starring it. Thank you very much, it means a lot to me.**
+
 **language**
 - [English](README.md)
 - [简体中文](README-zh.md)
 
 **Current Features**
 1. **Multi-view Support**: Provides table and list views to meet different scenario needs.
+	- **timeline**: use timeline view to display data.
 2. **Dataview SQL Support**: Compatible with Dataview's SQL syntax .
 3. **Enhanced Features**:
 	- **Search**: Quickly locate the content you need.
@@ -18,6 +21,7 @@ In the future, it will gradually expand with more practical features to help use
 
 **Tutorial**
 
+**table**
 ~~~markdown
 ```querydash
 table file.name , file.outlinks as "links" ,file.ctime as "ctime",
@@ -26,6 +30,24 @@ file.mtime as "mtime" ,file.tags as "tags" from #clippings
 ~~~
 
 ![demo.gif](docs/demo.gif)
+
+**timeline**
+
+**simple mode**
+~~~markdown
+```querydash
+timeline  from #start
+```
+~~~
+![timeline.png](docs/timeline.png)
+**full mode**
+
+If you want to append the time later, alias a specific field as "time".
+~~~markdown
+```querydash
+timeline file.ctime as "time" from #start where file.ctime<=date(today) sort file.mtime desc
+```
+~~~
 
 **Future Vision**
 1. **Homepage**: Integrate frequently used functions into the homepage for one-stop convenience.
