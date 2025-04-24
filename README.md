@@ -3,6 +3,8 @@ The goal of QueryDash is to develop an Obsidian plugin similar to Notion Databas
 **Since the API of Dataview is used, the Dataview plugin must be enabled.**
 In the future, it will gradually expand with more practical features to help users manage knowledge, tasks, and life more efficiently.
 
+**If you are interested in this project, please consider starring it. Thank you very much, it means a lot to me.**
+
 **language**
 - [English](README.md)
 - [简体中文](README-zh.md)
