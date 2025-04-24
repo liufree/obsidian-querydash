@@ -89,8 +89,6 @@ const TimeLineView: React.FC<ViewProps> = ({app, source}) => {
 	const executeTableQuery = async (dvApi: any, source: any, params: any) => {
 		const sql = replaceFirstWord(source);
 		const queryResult = await dvApi.query(sql);
-
-		console.log("queryResult", queryResult);
 		const tableData: any = parseTableResult(queryResult.value, params);
 		return {tableData: tableData};
 
