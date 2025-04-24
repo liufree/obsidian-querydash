@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import {formatValue} from "../GenerateColumns";
 import {getAPI} from 'obsidian-dataview';
 import {ViewProps} from "../../models/ViewProps";
-import {Radio, RadioChangeEvent, Timeline} from "antd";
+import {Radio, RadioChangeEvent, Timeline, Typography} from "antd";
 import {TFile} from "obsidian";
 
 
@@ -14,25 +14,39 @@ const TimeLineView: React.FC<ViewProps> = ({app, source}) => {
 	const dv = getAPI(app);
 	const [mode, setMode] = useState<'left' | 'alternate' | 'right'>('alternate');
 
+	const {Text, Link} = Typography;
+
+
 	const onChange = (e: RadioChangeEvent) => {
 		setMode(e.target.value);
 	};
 
+	const ellipsisLink = (display: string, path: any) => {
+		return (
+			<Link
+				onClick={() => {
+					const file = app.vault.getAbstractFileByPath(path);
+					if (file && file instanceof TFile) {
+						const leaf = app.workspace.getLeaf();
+						leaf.openFile(file);
+					}
+				}}>
+				<Text
+					style={display ? {maxWidth: 300, color: '#1890ff'} : {color: '#1890ff'}}
+					ellipsis={{expanded: true}}
+				>
+					{display}
+				</Text>
+			</Link>
+		);
+	};
 
 	const renderItem = (itemFile: any, itemCtime: any) => {
 		const date = itemCtime?.display.split(" ")[0] || "";
 
 		return (
 			<span>
-			<a onClick={() => {
-				const file = app.vault.getAbstractFileByPath(itemFile.path);
-				if (file && file instanceof TFile) {
-					const leaf = app.workspace.getLeaf();
-					leaf.openFile(file);
-				}
-			}}>
-				{itemFile.display}
-			</a>
+				{ellipsisLink(itemFile.display, itemFile.path)}
 				{date ? "  " + date : ""}
 			</span>
 		)
@@ -89,8 +103,6 @@ const TimeLineView: React.FC<ViewProps> = ({app, source}) => {
 	const executeTableQuery = async (dvApi: any, source: any, params: any) => {
 		const sql = replaceFirstWord(source);
 		const queryResult = await dvApi.query(sql);
-
-		console.log("queryResult", queryResult);
 		const tableData: any = parseTableResult(queryResult.value, params);
 		return {tableData: tableData};
 

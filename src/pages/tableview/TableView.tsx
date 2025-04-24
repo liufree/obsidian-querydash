@@ -1,6 +1,6 @@
 import type {ActionType, ProColumns} from '@ant-design/pro-components';
 import {ProTable} from '@ant-design/pro-components';
-import {List, Tag} from 'antd';
+import {List, Tag, Typography} from 'antd';
 import React, {useEffect, useRef} from 'react';
 import {getAPI} from 'obsidian-dataview';
 import {formatValue} from "../GenerateColumns";
@@ -14,6 +14,39 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 	const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
 
 	const dv = getAPI(app);
+	const {Text, Link} = Typography;
+
+
+	const ellipsisLink = (display: string, path: any) => {
+		return (
+			<Link
+				onClick={() => {
+					const file = app.vault.getAbstractFileByPath(path);
+					if (file && file instanceof TFile) {
+						const leaf = app.workspace.getLeaf();
+						leaf.openFile(file);
+					}
+				}}>
+				<Text
+					style={display ? {maxWidth: 200, color: '#1890ff'} : {color: '#1890ff'}}
+					ellipsis={{expanded:true}}
+				>
+					{display}
+				</Text>
+			</Link>
+		);
+	};
+
+	const ellipsisDisplay = (display: string) => {
+		return (
+			<Text
+				style={display ? {maxWidth: 300} : undefined}
+				ellipsis={{expanded:true}}
+			>
+				{display?.toString()}
+			</Text>
+		);
+	};
 
 	const createColumns = (headers: string[]) => {
 		let columns = [];
@@ -30,34 +63,18 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 				dataIndex: header,
 				sorter: (a, b) => a[header].display.toString().localeCompare(b[header].display.toString()),
 				render: (_, record) => {
-					const {type, path, display} = record[header]|| {};
+					const {type, path, display} = record[header] || {};
 					if (type === "datetime") {
-						return display;
+						return ellipsisDisplay(display);
 					}
 					if (type === "link") {
-						return <a onClick={() => {
-							const file = app.vault.getAbstractFileByPath(path);
-							if (file && file instanceof TFile) {
-								const leaf = app.workspace.getLeaf();
-								leaf.openFile(file);
-							}
-						}}>
-							{display}
-						</a>
+						return ellipsisLink(display, path);
 					}
 					if (type === "array") {
 						return display.map((v: any) => {
 							if (typeof v === "object") {
 								return <List.Item>
-									<a onClick={() => {
-										const file = app.vault.getAbstractFileByPath(v.path);
-										if (file && file instanceof TFile) {
-											const leaf = app.workspace.getLeaf();
-											leaf.openFile(file);
-										}
-									}}>
-										{v.display}
-									</a>
+									{ellipsisLink(v.display, v.path)}
 								</List.Item>
 							} else {
 								// tags
@@ -67,7 +84,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 							}
 						})
 					}
-					return display?.toString();
+					return ellipsisDisplay(display?.toString());
 				}
 			};
 		});
