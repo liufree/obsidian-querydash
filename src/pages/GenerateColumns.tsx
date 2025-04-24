@@ -21,7 +21,7 @@ export function formatValue(
 function formatObject(value: any) {
 	const type =value.type;
 	if(type==='file') {
-		const fileName = value.path.replace(/\.md$/, '');
+		const fileName = value.path.split('/').pop().replace(/\.md$/, '')
 		return {type: "link", path: value.path, display: fileName};
 	}
 
