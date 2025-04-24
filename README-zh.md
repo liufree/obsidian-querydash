@@ -8,6 +8,7 @@ QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不
 
 **现有功能**
 1. **多视图支持**：提供表格和列表两种视图，满足不同场景需求。
+	- **时间轴视图**: 使用时间轴来展示数据
 2. **Dataview SQL支持**：兼容Dataview的SQL语法。
 3. **增强功能**：
 	- **搜索**：快速定位所需内容。
@@ -26,6 +27,24 @@ file.mtime as "mtime" ,file.tags as "tags" from #clippings
 ~~~
 
 ![demo.gif](docs/demo.gif)
+
+**timeline**
+
+**simple mode**
+~~~markdown
+```querydash
+timeline  from #start
+```
+~~~
+![timeline.png](docs/timeline.png)
+**full mode**
+
+If you want to append the time later, alias a specific field as "time".
+~~~markdown
+```querydash
+timeline file.ctime as "time" from #start where file.ctime<=date(today) sort file.mtime desc
+```
+~~~
 
 
 **远景规划**
