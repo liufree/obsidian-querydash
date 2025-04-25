@@ -11,25 +11,25 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"@ant-design/icons": "^5.0.1",
+		"@ant-design/icons": "^6.0.0",
 		"@ant-design/pro-components": "^2.8.7",
 		"umi-request": "^1.4.0"
 	},
 	"devDependencies": {
-		"@types/luxon": "^3.4.2",
-		"@types/node": "^22.13.8",
-		"@types/react": "^18.0.33",
-		"@types/react-dom": "^18.0.11",
-		"@typescript-eslint/eslint-plugin": "5.29.0",
-		"@typescript-eslint/parser": "5.29.0",
-		"@vitejs/plugin-react": "^4.3.4",
-		"builtin-modules": "3.3.0",
+		"@types/luxon": "^3.6.2",
+		"@types/node": "^22.15.2",
+		"@types/react": "^19.1.2",
+		"@types/react-dom": "^19.1.2",
+		"@typescript-eslint/eslint-plugin": "8.31.0",
+		"@typescript-eslint/parser": "8.31.0",
+		"@vitejs/plugin-react": "^4.4.1",
+		"builtin-modules": "5.0.0",
 		"husky": "^9",
-		"lint-staged": "^13.2.0",
+		"lint-staged": "^15.5.1",
 		"obsidian": "latest",
-		"obsidian-dataview": "^0.5.67",
-		"tslib": "2.4.0",
-		"vite": "^6.2.6",
+		"obsidian-dataview": "^0.5.68",
+		"tslib": "2.8.1",
+		"vite": "^6.3.3",
 		"vite-plugin-css-injected-by-js": "^3.5.2"
 	}
 }
