@@ -29,13 +29,12 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 	const parseTaskData = (value: any) => {
 		const tasks = value.values || [];
 		const groupedTasks: Record<string, any[]> = {
-			done: [],
-			doing: [],
 			todo: [],
+			done: [],
 		};
 
 		tasks.forEach((task: any) => {
-			const status = task.status === "x" ? "done" : task.status === "?" ? "doing" : "todo";
+			const status = task.status === "x" ? "done" : "todo";
 			groupedTasks[status].push({
 				...task,
 				type: "link",
@@ -48,13 +47,15 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 		}));
 	};
 
-	const executeTaskQuery = async (dvApi: any, source: any) => {
-		const queryResult = await dvApi.query(source);
-		console.log("queryResult", queryResult);
-		if (queryResult.successful) {
-			return parseTaskData(queryResult.value);
-		}
-		return [];
+	const executeTaskQuery = (dvApi: any, source: any) => {
+		dvApi.query(source).then((result: any) => {
+			console.log("queryResult", result);
+			if (result.successful) {
+				const data = parseTaskData(result.value);
+				console.log("Data:", data); // 输出 data
+				setColumns([...data]);
+			}
+		});
 	};
 
 	const onChange: (e: CheckboxChangeEvent, item: STask) => void = async (e, item) => {
@@ -64,8 +65,7 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 		const status = completed ? "x" : " ";
 		console.log("status", status);
 		let updatedText: string = item.text;
-		await rewriteTask(app.vault, item, status, updatedText)
-		setRefresh(true)
+		await rewriteTask(app.vault, item, status, updatedText);
 	};
 
 
@@ -118,15 +118,48 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 		let newText = filetext.join(hasRN ? "\r\n" : "\n");
 		console.log("newText", newText);
 		console.log("taskPath", task.path);
-		await vault.adapter.write(task.path, newText);
+		vault.adapter.write(task.path, newText).then((res) => {
+
+		});
 	}
 
 
 	useEffect(() => {
 		executeTaskQuery(dv, source)
-			.then((data) => setColumns(JSON.parse(JSON.stringify(data))))
-			.catch((error) => console.error("Error executing query:", error));
 	}, [app, source, refresh]);
+
+	useEffect(() => {
+
+
+		const onModify = (file: TFile) => {
+			setTimeout(() => {
+				setRefresh((prev) => !prev); // 触发刷新
+			}, 300); // 延迟 500 毫秒，可根据实际情况调整
+			console.log("文件已修改:", file.path);
+		};
+
+		const onCreate = (file: TFile) => {
+			console.log("文件已创建:", file.path);
+			setRefresh(!refresh); // 触发刷新
+		};
+
+		const onDelete = (file: TFile) => {
+			console.log("文件已删除:", file.path);
+			setRefresh(!refresh); // 触发刷新
+		};
+
+		// 监听文件事件
+		app.vault.on("modify", onModify);
+		app.vault.on("create", onCreate);
+		app.vault.on("delete", onDelete);
+
+		// 清理事件监听器
+		return () => {
+			app.vault.off("modify", onModify);
+			app.vault.off("create", onCreate);
+			app.vault.off("delete", onDelete);
+		};
+	}, [app]);
 
 	return (
 		<ProCard ghost gutter={8}>
@@ -136,9 +169,7 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 						<>
 							<ProCard key={index} bordered>
 								<Checkbox onChange={(e) => onChange(e, item)} checked={item.checked}>
-									{item.type === "link"
-										? ellipsisLink(item.text, item.path)
-										: <Text>{item.text}</Text>}
+									<Text>{item.text}</Text>
 								</Checkbox>
 							</ProCard>
 						</>
