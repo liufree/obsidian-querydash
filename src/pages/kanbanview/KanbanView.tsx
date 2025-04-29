@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {ProCard} from "@ant-design/pro-components";
-import {Checkbox, CheckboxChangeEvent, CheckboxProps, Typography} from "antd";
+import {Checkbox, CheckboxChangeEvent, CheckboxProps, Row, Typography} from "antd";
 import {getAPI, STask} from "obsidian-dataview";
 import {ViewProps} from "../../models/ViewProps";
 import {TFile, Vault} from "obsidian";
+import EditableText from "./EditableText";
 
 const {Text, Link} = Typography;
 
@@ -22,7 +23,16 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 				}
 			}}
 		>
-			<Text ellipsis>{display}</Text>
+			<Text
+				style={display ? {maxWidth: 200, color: '#1890ff', cursor: 'pointer'} : {
+					color: '#1890ff',
+					cursor: 'pointer'
+				}}
+				ellipsis={{expanded: true}}
+			>
+				→
+			</Text>
+
 		</Link>
 	);
 
@@ -58,13 +68,13 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 		});
 	};
 
-	const onChange: (e: CheckboxChangeEvent, item: STask) => void = async (e, item) => {
-		console.log("completed", e.target.checked);
+	const onChange: (checked: boolean, updateText: string, item: STask) => void = async (checked, updateText, item) => {
+		console.log("completed", checked);
 		console.log("item", item);
-		const completed = e.target.checked;
+		const completed = checked;
 		const status = completed ? "x" : " ";
 		console.log("status", status);
-		let updatedText: string = item.text;
+		let updatedText: string = updateText;
 		await rewriteTask(app.vault, item, status, updatedText);
 	};
 
@@ -168,9 +178,20 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 					{column.items.map((item: any, index: number) => (
 						<>
 							<ProCard key={index} bordered>
-								<Checkbox onChange={(e) => onChange(e, item)} checked={item.checked}>
-									<Text>{item.text}</Text>
-								</Checkbox>
+								<Row>
+									<Checkbox
+										onChange={(e) => onChange(e.target.checked, item.text, item)}
+										checked={item.checked}
+									/>
+									<EditableText
+										app={app}
+										item={item}
+										onSave={(newText) => {
+											console.log("保存的新文本:", newText);
+											onChange(item.checked, newText, item);
+										}}
+									/>
+								</Row>
 							</ProCard>
 						</>
 					))}
