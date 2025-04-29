@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {ProCard} from "@ant-design/pro-components";
-import {Checkbox, CheckboxChangeEvent, CheckboxProps, Row, Typography} from "antd";
+import {Checkbox, CheckboxChangeEvent, CheckboxProps, Col, Input, Row, Typography} from "antd";
 import {getAPI, STask} from "obsidian-dataview";
 import {ViewProps} from "../../models/ViewProps";
 import {TFile, Vault} from "obsidian";
@@ -179,18 +179,22 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 						<>
 							<ProCard key={index} bordered>
 								<Row>
-									<Checkbox
-										onChange={(e) => onChange(e.target.checked, item.text, item)}
-										checked={item.checked}
-									/>
-									<EditableText
-										app={app}
-										item={item}
-										onSave={(newText) => {
-											console.log("保存的新文本:", newText);
-											onChange(item.checked, newText, item);
-										}}
-									/>
+									<Col span={1}>
+										<Checkbox
+											onChange={(e) => onChange(e.target.checked, item.text, item)}
+											checked={item.checked}
+										/>
+									</Col>
+									<Col span={18}>
+										<EditableText
+											app={app}
+											item={item}
+											onSave={(newText) => {
+												console.log("保存的新文本:", newText);
+												onChange(item.checked, newText, item);
+											}}
+										/>
+									</Col>
 								</Row>
 							</ProCard>
 						</>
