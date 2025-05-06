@@ -10,7 +10,6 @@ import {ViewProps} from "../../models/ViewProps";
 
 const TableView: React.FC<ViewProps> = ({app, source}) => {
 
-	const actionRef = useRef<ActionType>();
 	const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
 
 	const dv = getAPI(app);
@@ -61,7 +60,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 			return {
 				title: header,
 				dataIndex: header,
-				sorter: (a, b) => a[header].display.toString().localeCompare(b[header].display.toString()),
+				sorter: (a, b) => a[header]?.display?.toString()?.localeCompare(b[header]?.display?.toString()),
 				render: (_, record) => {
 					const {type, path, display} = record[header] || {};
 					if (type === "datetime") {
@@ -155,7 +154,6 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 	return (
 		<ProTable
 			scroll={{x: 'max-content'}}
-			actionRef={actionRef}
 			cardBordered
 			editable={{
 				type: 'multiple',

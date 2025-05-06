@@ -5,6 +5,7 @@ import ListView from "./listview/ListView";
 import {ConfigProvider, ConfigProviderProps, Timeline} from "antd";
 import enUS from 'antd/locale/en_US';
 import TimeLineView from "./timelineview/TimeLineView";
+import KanbanView from "./kanbanview/KanbanView";
 
 
 interface QueryDashViewDashs {
@@ -31,6 +32,8 @@ const QueryDashView: React.FC<QueryDashViewDashs> = ({app, source}) => {
 			return <ListView app={app} source={source}/>;
 		} else if (sourceType === "timeline") {
 			return <TimeLineView app={app} source={source}/>;
+		} else if (sourceType === "task") {
+			return <KanbanView app={app} source={source}/>;
 		}
 	}
 
