@@ -61,7 +61,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 			return {
 				title: header,
 				dataIndex: header,
-				sorter: (a, b) => a[header].display.toString().localeCompare(b[header].display.toString()),
+				sorter: (a, b) => a[header]?.display?.toString()?.localeCompare(b[header]?.display?.toString()),
 				render: (_, record) => {
 					const {type, path, display} = record[header] || {};
 					if (type === "datetime") {
