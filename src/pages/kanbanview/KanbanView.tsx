@@ -5,6 +5,7 @@ import {getAPI, STask} from "obsidian-dataview";
 import {ViewProps} from "../../models/ViewProps";
 import {TFile, Vault} from "obsidian";
 import EditableText from "./EditableText";
+import EditableTable from "../../components/EditableTable";
 
 const {Text, Link} = Typography;
 
@@ -22,7 +23,7 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 					leaf.openFile(file);
 				}
 			}}
-		>
+		>  
 			<Text
 				style={display ? {maxWidth: 200, color: '#1890ff', cursor: 'pointer'} : {
 					color: '#1890ff',
@@ -172,36 +173,40 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 	}, [app]);
 
 	return (
-		<ProCard ghost gutter={8}>
-			{columns.map((column) => (
-				<ProCard key={column.title} title={column.title} bordered>
-					{column.items.map((item: any, index: number) => (
-						<>
-							<ProCard key={index} bordered>
-								<Row>
-									<Col span={1}>
-										<Checkbox
-											onChange={(e) => onChange(e.target.checked, item.text, item)}
-											checked={item.checked}
-										/>
-									</Col>
-									<Col span={18}>
-										<EditableText
-											app={app}
-											item={item}
-											onSave={(newText) => {
-												console.log("保存的新文本:", newText);
-												onChange(item.checked, newText, item);
-											}}
-										/>
-									</Col>
-								</Row>
-							</ProCard>
-						</>
-					))}
-				</ProCard>
-			))}
-		</ProCard>
+		<>
+			<EditableTable></EditableTable>
+
+			<ProCard ghost gutter={8}>
+				{columns.map((column) => (
+					<ProCard key={column.title} title={column.title} bordered>
+						{column.items.map((item: any, index: number) => (
+							<>
+								<ProCard key={index} bordered>
+									<Row>
+										<Col span={1}>
+											<Checkbox
+												onChange={(e) => onChange(e.target.checked, item.text, item)}
+												checked={item.checked}
+											/>
+										</Col>
+										<Col span={18}>
+											<EditableText
+												app={app}
+												item={item}
+												onSave={(newText) => {
+													console.log("保存的新文本:", newText);
+													onChange(item.checked, newText, item);
+												}}
+											/>
+										</Col>
+									</Row>
+								</ProCard>
+							</>
+						))}
+					</ProCard>
+				))}
+			</ProCard>
+		</>
 	);
 };
 
