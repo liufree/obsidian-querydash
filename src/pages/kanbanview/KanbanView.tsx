@@ -174,7 +174,7 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 
 	return (
 		<>
-			<EditableTable></EditableTable>
+			{/*<EditableTable></EditableTable>*/}
 
 			<ProCard ghost gutter={8}>
 				{columns.map((column) => (

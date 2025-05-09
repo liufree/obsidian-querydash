@@ -182,7 +182,6 @@ const columns: ProColumns<DataSourceType>[] = [
 ];
 
 export default () => {
-	const actionRef = useRef<ActionType>();
 	const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
 	const [dataSource, setDataSource] = useState<readonly DataSourceType[]>([]);
 	const [form] = Form.useForm();
@@ -193,7 +192,6 @@ export default () => {
 				scroll={{
 					x: 960,
 				}}
-				actionRef={actionRef}
 				headerTitle="可编辑表格"
 				maxLength={5}
 				// 关闭默认的新建按钮
