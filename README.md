@@ -37,6 +37,8 @@ file.mtime as "mtime" ,file.tags as "tags" from #clippings
 ```querydash
 task
 ```
+~~~
+
 ![task.png](docs/task.png)
 
 **timeline**
