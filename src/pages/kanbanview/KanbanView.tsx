@@ -11,6 +11,10 @@ const {Text, Link} = Typography;
 
 const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 	const [columns, setColumns] = useState<any>([]);
+	const [allData, setAllData] = useState<any>([]);
+	const [todoData, setTodoData] = useState<any>([]);
+	const [doneData, setDoneData] = useState<any>([]);
+
 	const [refresh, setRefresh] = useState(false);
 	const [tab, setTab] = useState('all');
 	const dv = getAPI(app);
@@ -20,18 +24,22 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 		return tasks;
 	};
 
-	const executeTaskQuery = (dvApi: any, source: any,key:any) => {
+	const executeTaskQuery = (dvApi: any, source: any, key: any) => {
 		dvApi.query(source).then((result: any) => {
 			console.log("queryResult", result);
+			console.log("key", key);
 			if (result.successful) {
 				const data = parseTaskData(result.value);
 				let filteredDataList = [...data]
 				if (key == "todo") {
 					filteredDataList = data.filter((item: any) => item.status === " ");
+					setTodoData(filteredDataList)
 				} else if (key == "done") {
 					filteredDataList = data.filter((item: any) => item.status === "x");
+					setDoneData(filteredDataList)
+				} else {
+					setAllData(filteredDataList)
 				}
-				setColumns([...filteredDataList]);
 			}
 		});
 	};
@@ -104,8 +112,10 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 
 
 	useEffect(() => {
-		executeTaskQuery(dv, source,tab);
-	}, [app, source, refresh ,tab]);
+		executeTaskQuery(dv, source, "all");
+		executeTaskQuery(dv, source, "todo");
+		executeTaskQuery(dv, source, "done");
+	}, [app, source, refresh]);
 
 	useEffect(() => {
 
@@ -178,17 +188,17 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 						{
 							label: `ALL`,
 							key: 'all',
-							children: cardDetails(columns),
+							children: cardDetails(allData),
 						},
 						{
 							label: `TODO`,
 							key: 'todo',
-							children: cardDetails(columns),
+							children: cardDetails(todoData),
 						},
 						{
 							label: `DONE`,
 							key: 'done',
-							children: cardDetails(columns),
+							children: cardDetails(doneData),
 						},
 					],
 					onChange: (key) => {
