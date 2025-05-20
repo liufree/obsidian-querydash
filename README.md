@@ -33,6 +33,10 @@ file.mtime as "mtime" ,file.tags as "tags" from #clippings
 ![demo.gif](docs/demo.gif)
 
 **task**
+~~~markdown
+```querydash
+task
+```
 ![task.png](docs/task.png)
 
 **timeline**
