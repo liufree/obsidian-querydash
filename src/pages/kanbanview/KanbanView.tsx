@@ -10,61 +10,36 @@ import EditableTable from "../../components/EditableTable";
 const {Text, Link} = Typography;
 
 const KanbanView: React.FC<ViewProps> = ({app, source}) => {
-	const [columns, setColumns] = useState<any[]>([]);
+	const [columns, setColumns] = useState<any>([]);
+	const [allData, setAllData] = useState<any>([]);
+	const [todoData, setTodoData] = useState<any>([]);
+	const [doneData, setDoneData] = useState<any>([]);
+
 	const [refresh, setRefresh] = useState(false);
+	const [tab, setTab] = useState('all');
 	const dv = getAPI(app);
-
-	const ellipsisLink = (display: string, path: string) => (
-		<Link
-			onClick={() => {
-				const file = app.vault.getAbstractFileByPath(path);
-				if (file && file instanceof TFile) {
-					const leaf = app.workspace.getLeaf();
-					leaf.openFile(file);
-				}
-			}}
-		>  
-			<Text
-				style={display ? {maxWidth: 200, color: '#1890ff', cursor: 'pointer'} : {
-					color: '#1890ff',
-					cursor: 'pointer'
-				}}
-				ellipsis={{expanded: true}}
-			>
-				→
-			</Text>
-
-		</Link>
-	);
 
 	const parseTaskData = (value: any) => {
 		const tasks = value.values || [];
-		const groupedTasks: Record<string, any[]> = {
-			todo: [],
-			done: [],
-		};
-
-		tasks.forEach((task: any) => {
-			const status = task.status === "x" ? "done" : "todo";
-			groupedTasks[status].push({
-				...task,
-				type: "link",
-			});
-		});
-
-		return Object.keys(groupedTasks).map((status) => ({
-			title: status.toUpperCase(),
-			items: groupedTasks[status],
-		}));
+		return tasks;
 	};
 
-	const executeTaskQuery = (dvApi: any, source: any) => {
+	const executeTaskQuery = (dvApi: any, source: any, key: any) => {
 		dvApi.query(source).then((result: any) => {
 			console.log("queryResult", result);
+			console.log("key", key);
 			if (result.successful) {
 				const data = parseTaskData(result.value);
-				console.log("Data:", data); // 输出 data
-				setColumns([...data]);
+				let filteredDataList = [...data]
+				if (key == "todo") {
+					filteredDataList = data.filter((item: any) => item.status === " ");
+					setTodoData(filteredDataList)
+				} else if (key == "done") {
+					filteredDataList = data.filter((item: any) => item.status === "x");
+					setDoneData(filteredDataList)
+				} else {
+					setAllData(filteredDataList)
+				}
 			}
 		});
 	};
@@ -72,6 +47,7 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 	const onChange: (checked: boolean, updateText: string, item: STask) => void = async (checked, updateText, item) => {
 		console.log("completed", checked);
 		console.log("item", item);
+		console.log("updateText", updateText);
 		const completed = checked;
 		const status = completed ? "x" : " ";
 		console.log("status", status);
@@ -85,7 +61,7 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 	/** Rewrite a task with the given completion status and new text. */
 	async function rewriteTask(vault: Vault, task: STask, desiredStatus: string, desiredText?: string) {
 		if (desiredStatus == task.status && (desiredText == undefined || desiredText == task.text)) return;
-		desiredStatus = desiredStatus == "" ? " " : desiredStatus;
+		desiredStatus = desiredStatus == " " ? " " : desiredStatus;
 
 		let rawFiletext = await vault.adapter.read(task.path);
 
@@ -136,7 +112,9 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 
 
 	useEffect(() => {
-		executeTaskQuery(dv, source)
+		executeTaskQuery(dv, source, "all");
+		executeTaskQuery(dv, source, "todo");
+		executeTaskQuery(dv, source, "done");
 	}, [app, source, refresh]);
 
 	useEffect(() => {
@@ -172,40 +150,62 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 		};
 	}, [app]);
 
+	const cardDetails = (dataList: any) => {
+		return (
+			dataList.map((item: any) => (
+				<>
+					<ProCard bordered>
+						<Row>
+							<Col span={1}>
+								<Checkbox
+									onChange={(e) => onChange(e.target.checked, item.text, item)}
+									checked={item.checked}
+								/>
+							</Col>
+							<Col span={18}>
+								<EditableText
+									app={app}
+									item={item}
+									onSave={(newText) => {
+										console.log("保存的新文本:", newText);
+										onChange(item.checked, newText, item);
+									}}
+								/>
+							</Col>
+						</Row>
+					</ProCard>
+				</>
+			))
+		)
+	}
+
 	return (
 		<>
-			{/*<EditableTable></EditableTable>*/}
-
-			<ProCard ghost gutter={8}>
-				{columns.map((column) => (
-					<ProCard key={column.title} title={column.title} bordered>
-						{column.items.map((item: any, index: number) => (
-							<>
-								<ProCard key={index} bordered>
-									<Row>
-										<Col span={1}>
-											<Checkbox
-												onChange={(e) => onChange(e.target.checked, item.text, item)}
-												checked={item.checked}
-											/>
-										</Col>
-										<Col span={18}>
-											<EditableText
-												app={app}
-												item={item}
-												onSave={(newText) => {
-													console.log("保存的新文本:", newText);
-													onChange(item.checked, newText, item);
-												}}
-											/>
-										</Col>
-									</Row>
-								</ProCard>
-							</>
-						))}
-					</ProCard>
-				))}
-			</ProCard>
+			<ProCard
+				tabs={{
+					activeKey: tab,
+					items: [
+						{
+							label: `ALL`,
+							key: 'all',
+							children: cardDetails(allData),
+						},
+						{
+							label: `TODO`,
+							key: 'todo',
+							children: cardDetails(todoData),
+						},
+						{
+							label: `DONE`,
+							key: 'done',
+							children: cardDetails(doneData),
+						},
+					],
+					onChange: (key) => {
+						setTab(key);
+					},
+				}}
+			/>
 		</>
 	);
 };

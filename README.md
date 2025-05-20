@@ -18,6 +18,7 @@ In the future, it will gradually expand with more practical features to help use
 	- **Filter**: Screen data based on conditions.
 	- **Aggregation**: Supports data summary statistics.
 	- **Pagination**: Optimizes browsing experience for large datasets.
+    - **Task**: Supports task management, including task editing.
 
 **Tutorial**
 
@@ -30,6 +31,9 @@ file.mtime as "mtime" ,file.tags as "tags" from #clippings
 ~~~
 
 ![demo.gif](docs/demo.gif)
+
+**task**
+![task.png](docs/task.png)
 
 **timeline**
 
