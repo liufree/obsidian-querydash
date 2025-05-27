@@ -5,7 +5,12 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({mode}) => {
 	return {
-		plugins: [react(),cssInjectedByJsPlugin()],
+		plugins: [react(), cssInjectedByJsPlugin()],
+		define: {
+			'process.env': {
+				NODE_ENV: JSON.stringify(mode)
+			}
+		},
 		build: {
 			sourcemap: mode === 'development' ? 'inline' : false,
 			minify: false,
