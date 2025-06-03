@@ -1,7 +1,7 @@
 {
 	"id": "querydash",
 	"name": "QueryDash",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"minAppVersion": "1.8.0",
 	"description": "Refer to Dataview and add search, sorting, and pagination functions, just like Notion.",
 	"author": "lwx",
