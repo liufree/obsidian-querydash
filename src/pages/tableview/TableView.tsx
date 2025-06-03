@@ -1,51 +1,16 @@
 import type {ActionType, ProColumns} from '@ant-design/pro-components';
 import {ProTable} from '@ant-design/pro-components';
-import {List, Tag, Typography} from 'antd';
+import {List, Tag} from 'antd';
 import React, {useEffect, useRef} from 'react';
 import {getAPI} from 'obsidian-dataview';
-import {formatValue} from "../GenerateColumns";
-import {App, TFile} from "obsidian";
+import {formatValue, ellipsisLink, ellipsisDisplay, externalLink} from "../GenerateColumns";
 import {ViewProps} from "../../models/ViewProps";
 
 
 const TableView: React.FC<ViewProps> = ({app, source}) => {
 
 	const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
-
 	const dv = getAPI(app);
-	const {Text, Link} = Typography;
-
-
-	const ellipsisLink = (display: string, path: any) => {
-		return (
-			<Link
-				onClick={() => {
-					const file = app.vault.getAbstractFileByPath(path);
-					if (file && file instanceof TFile) {
-						const leaf = app.workspace.getLeaf();
-						leaf.openFile(file);
-					}
-				}}>
-				<Text
-					style={display ? {maxWidth: 200, color: '#1890ff'} : {color: '#1890ff'}}
-					ellipsis={{expanded:true}}
-				>
-					{display}
-				</Text>
-			</Link>
-		);
-	};
-
-	const ellipsisDisplay = (display: string) => {
-		return (
-			<Text
-				style={display ? {maxWidth: 300} : undefined}
-				ellipsis={{expanded:true}}
-			>
-				{display?.toString()}
-			</Text>
-		);
-	};
 
 	const createColumns = (headers: string[]) => {
 		let columns = [];
@@ -66,14 +31,17 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 					if (type === "datetime") {
 						return ellipsisDisplay(display);
 					}
+					if (type === "externalLink") {
+						return externalLink(display, path);
+					}
 					if (type === "link") {
-						return ellipsisLink(display, path);
+						return ellipsisLink(app, display, path);
 					}
 					if (type === "array") {
 						return display.map((v: any) => {
 							if (typeof v === "object") {
 								return <List.Item>
-									{ellipsisLink(v.display, v.path)}
+									{ellipsisLink(app, v.display, v.path)}
 								</List.Item>
 							} else {
 								// tags
@@ -138,6 +106,8 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 
 		const queryResult = await dvApi.query(sql);
 
+		console.log("queryResult", queryResult);
+
 		const tableData: any = parseTableResult(queryResult.value, params);
 
 		const headers: string[] = queryResult.value.headers;
@@ -181,6 +151,8 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 			request={async (params, sort, filter) => {
 				//	console.log('params:', params);
 				const response = await executeTableQuery(dv, source, params);
+
+				console.log("response", response);
 				const {tableData, columns} = response;
 
 				setColumns(columns);
