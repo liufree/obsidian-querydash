@@ -106,8 +106,6 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 
 		const queryResult = await dvApi.query(sql);
 
-		console.log("queryResult", queryResult);
-
 		const tableData: any = parseTableResult(queryResult.value, params);
 
 		const headers: string[] = queryResult.value.headers;
