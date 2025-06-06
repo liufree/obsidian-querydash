@@ -37,7 +37,9 @@ const QueryDashView: React.FC<QueryDashViewDashs> = ({app, source}) => {
 
 	useEffect(() => {
 		// Get the first word of the source
-		const sourceType = source.split(" ")[0].toLowerCase();
+		let sourceType = source.match(/^\s*(\S+)/)?.[1] ?? '';
+		sourceType = sourceType.toLowerCase();
+
 		setSourceType(sourceType);
 	}, [source]);
 

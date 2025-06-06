@@ -66,13 +66,14 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 
 		const rows: Array<Record<string, any>> = [];
 
-		value.values.forEach((row: any) => {
+		value.values.forEach((row: any,rowIndex: number) => {
 			const values: Record<string, any> = {};
 			headers.forEach((header, index) => {
 				const value = row[index];
 				const resValue = formatValue(value);
 				values[header] = resValue;
 			});
+			values['key'] = rowIndex; // Add a unique key for each row
 			rows.push(values);
 		});
 
@@ -106,8 +107,6 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 
 		const queryResult = await dvApi.query(sql);
 
-		console.log("queryResult", queryResult);
-
 		const tableData: any = parseTableResult(queryResult.value, params);
 
 		const headers: string[] = queryResult.value.headers;
@@ -140,7 +139,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 					//	console.log('value: ', value);
 				},
 			}}
-			rowKey="title"
+			rowKey={(record) => record.key}
 			search={{
 				labelWidth: 'auto',
 			}}
@@ -152,7 +151,6 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 				//	console.log('params:', params);
 				const response = await executeTableQuery(dv, source, params);
 
-				console.log("response", response);
 				const {tableData, columns} = response;
 
 				setColumns(columns);
