@@ -47,7 +47,7 @@ function formatObject(value: any) {
 
 export const ellipsisLink = (app: any, display: string, path: any) => {
 	return (
-		<a
+		<Link
 			onClick={() => {
 				const file = app.vault.getAbstractFileByPath(path);
 				if (file && file instanceof TFile) {
@@ -61,7 +61,7 @@ export const ellipsisLink = (app: any, display: string, path: any) => {
 			>
 				{display}
 			</Text>
-		</a>
+		</Link>
 	);
 };
 
@@ -78,7 +78,7 @@ export const ellipsisDisplay = (display: string) => {
 
 export const externalLink = (display: string, path: string) => {
 	// 在obsidian中打开外部链接
-	return <a
+	return <Link
 		onClick={() => {
 			window.open(path, "_blank");
 		}}>
@@ -88,6 +88,6 @@ export const externalLink = (display: string, path: string) => {
 		>
 			{display}
 		</Text>
-	</a>;
+	</Link>;
 }
 

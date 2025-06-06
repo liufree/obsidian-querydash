@@ -138,7 +138,6 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 					//	console.log('value: ', value);
 				},
 			}}
-			rowKey="title"
 			search={{
 				labelWidth: 'auto',
 			}}
@@ -150,7 +149,6 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 				//	console.log('params:', params);
 				const response = await executeTableQuery(dv, source, params);
 
-				console.log("response", response);
 				const {tableData, columns} = response;
 
 				setColumns(columns);
