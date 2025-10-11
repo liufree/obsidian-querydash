@@ -1,9 +1,9 @@
 {
 	"id": "querydash",
 	"name": "QueryDash",
-	"version": "1.1.1",
+	"version": "2.0.0",
 	"minAppVersion": "1.8.0",
-	"description": "Refer to Dataview and add search, sorting, and pagination functions, just like Notion.",
+	"description": "The new view for bases refers to an updated or additional interface that allows users to interact with base data in a different way, such as through enhanced search, sorting, and pagination features, similar to Notion. This improves usability and data management within your application. It was originally a new view for dataview, but now its functionality has been extended to bases.",
 	"author": "lwx",
 	"authorUrl": "https://github.com/liufree",
 	"isDesktopOnly": false
