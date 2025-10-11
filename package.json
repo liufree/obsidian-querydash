@@ -11,25 +11,25 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"@ant-design/icons": "^6.0.0",
-		"@ant-design/pro-components": "^2.8.7",
+		"@ant-design/icons": "^6.1.0",
+		"@ant-design/pro-components": "^2.8.10",
 		"umi-request": "^1.4.0"
 	},
 	"devDependencies": {
-		"@types/luxon": "^3.6.2",
+		"@types/luxon": "^3.7.1",
 		"@types/node": "^22.15.2",
-		"@types/react": "^19.1.2",
-		"@types/react-dom": "^19.1.2",
-		"@typescript-eslint/eslint-plugin": "8.31.0",
-		"@typescript-eslint/parser": "8.31.0",
-		"@vitejs/plugin-react": "^4.4.1",
+		"@types/react": "^19.2.2",
+		"@types/react-dom": "^19.2.1",
+		"@typescript-eslint/eslint-plugin": "8.46.0",
+		"@typescript-eslint/parser": "8.46.0",
+		"@vitejs/plugin-react": "^5.0.4",
 		"builtin-modules": "5.0.0",
 		"husky": "^9",
-		"lint-staged": "^15.5.1",
+		"lint-staged": "^16.2.4",
 		"obsidian": "latest",
 		"obsidian-dataview": "^0.5.68",
 		"tslib": "2.8.1",
-		"vite": "^6.3.3",
+		"vite": "7.1.5",
 		"vite-plugin-css-injected-by-js": "^3.5.2"
 	}
 }
