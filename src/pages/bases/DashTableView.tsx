@@ -1,4 +1,4 @@
-import {BasesView, QueryController} from 'obsidian';
+import {BasesPropertyId, BasesView, parsePropertyId, QueryController} from 'obsidian';
 import {createRoot} from "react-dom/client";
 import React, {useEffect} from "react";
 import {ViewProps} from "../../models/ViewProps";
@@ -17,81 +17,88 @@ export class DashTableView extends BasesView {
 		this.containerEl = parentEl.createDiv('bases-example-view-container');
 	}
 
-	public onDataUpdated(): void {
-		const {app} = this;
-		this.containerEl.empty();
-
-		console.log(this.data.data);
-
-		const source = "table file.name , file.outlinks as \"links\" ,file.ctime as \"ctime\",  \n" +
-			"file.mtime as \"mtime\" ,file.tags as \"tags\" from #clippings";
-		const container = this.containerEl.createDiv();
-		const root = createRoot(container);
-		root.render(<TableView app={app} source={source}/>);
-	}
-}
-
-const TableView: React.FC<ViewProps> = ({app, source}) => {
-
-	const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
-	const dv = getAPI(app);
-
-	const createColumns = (headers: string[]) => {
+	createColumns = (properties: string[]) => {
 		let columns = [];
 		const firstColumn: ProColumns<any> = {
 			dataIndex: 'index',
 			valueType: 'indexBorder',
 			title: 'index',
 			sorter: true,
-		};
+		}
 		columns.push(firstColumn);
-		const dynamicColumns: ProColumns<any>[] = headers.map((header) => {
-			return {
-				title: header,
-				dataIndex: header,
-				sorter: (a, b) => a[header]?.display?.toString()?.localeCompare(b[header]?.display?.toString()),
-				render: (_, record) => {
-					const {type, path, display} = record[header] || {};
-					return ellipsisDisplay(display?.toString());
-				}
-			};
-		});
+		const dynamicColumns: ProColumns<any>[] = properties.map((property) => {
+				return {
+					title: property,
+					dataIndex: property,
+					render: (_, record) => {
+						const value = record[property];
+						if (value === null || value === undefined) {
+							return "";
+						}
+						return ellipsisDisplay(value);
+					}
+				};
+			}
+		);
 		columns.push(...dynamicColumns);
 		return columns;
 	}
 
-	function parseTableResult(value: any, params: any): Array<Record<string, any>> {
-		const headers: string[] = value.headers;
-		// console.log("headers", headers);
-		//	console.log("valueData", value);
 
-		const rows: Array<Record<string, any>> = [];
+	public onDataUpdated(): void {
+		const {app} = this;
+		this.containerEl.empty();
 
-		value.values.forEach((row: any, rowIndex: number) => {
-			const values: Record<string, any> = {};
-			headers.forEach((header, index) => {
-				const value = row[index];
-				const resValue = formatValue(value);
-				values[header] = resValue;
+		console.log(this.data.properties);
+
+		console.log(this.data.data);
+
+		let newDatas: Record<string, any> = []
+		const data = this.data.data;
+		data.map(item => {
+
+			let newItem: Record<string, any> = {};
+
+			this.data.properties.map((prop: BasesPropertyId) => {
+				console.log(item.getValue(prop));
+
+				const {type, name} = parsePropertyId(prop);
+				// `entry.getValue` returns the evaluated result of the property
+				// in the context of this entry.
+				const value = item.getValue(prop);
+				newItem[prop] = value?.toString();
 			});
-			values['key'] = rowIndex; // Add a unique key for each row
-			rows.push(values);
-		});
+			newDatas.push(newItem);
+		})
 
+		const columnsHead = this.createColumns(this.data.properties);
+
+		console.log(columnsHead);
+		console.log(newDatas);
+
+		const container = this.containerEl.createDiv();
+		const root = createRoot(container);
+		root.render(<TableView app={app} source={""} columnsHead={columnsHead} data={newDatas}/>);
+	}
+
+
+}
+
+const TableView: React.FC<ViewProps> = ({app, source, columnsHead, data}) => {
+
+	const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
+	const dv = getAPI(app);
+
+
+	function parseTableResult(rows: any, params: any): Array<Record<string, any>> {
 		delete params.current;
 		delete params.pageSize;
-
-		// console.log("rowsData", rows);
-		//	console.log("paramsData", params);
 
 		const filteredData = rows.filter(item => {
 			return Object.keys(params).every(key => {
 				if (params[key]) {
-					//		console.log("param1 key", key);
-					// If item[key] is empty, return false directly.
 					if (item[key]) {
-						//			console.log("item[key]", item[key]);
-						return item[key].display.toString().toLowerCase().includes(params[key].toString().toLowerCase());
+						return item[key].toString().toLowerCase().includes(params[key].toString().toLowerCase());
 					} else {
 						return true;
 					}
@@ -103,15 +110,14 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 		return filteredData;
 	}
 
-	const executeTableQuery = async (dvApi: any, source: any, params: any) => {
+	const executeTableQuery = async (datas: any, params: any) => {
 		const sql = source;
 
-		const queryResult = await dvApi.query(sql);
+		const queryResult = datas
 
-		const tableData: any = parseTableResult(queryResult.value, params);
+		const tableData: any = parseTableResult(queryResult, params);
 
-		const headers: string[] = queryResult.value.headers;
-		const columns = createColumns(headers);
+		const columns = columnsHead;
 
 		return {tableData: tableData, columns: columns};
 	}
@@ -150,7 +156,7 @@ const TableView: React.FC<ViewProps> = ({app, source}) => {
 			headerTitle="TableView"
 			request={async (params, sort, filter) => {
 				//	console.log('params:', params);
-				const response = await executeTableQuery(dv, source, params);
+				const response = await executeTableQuery(data, params);
 
 				const {tableData, columns} = response;
 
