@@ -18,6 +18,23 @@ export class DashTableView extends BasesView {
 		this.containerEl = parentEl.createDiv('bases-example-view-container');
 	}
 
+	// 获取链接的显示文本（别名）
+	getLinkDisplayName(linkText: string): string {
+		const linkMatch = linkText.match(/\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
+		if (!linkMatch) return linkText;
+
+		return linkMatch[2] || linkMatch[1]; // 返回别名或文件名
+	}
+
+	parseWikilink(linktext: string): string | null {
+		// 匹配 [[文件名|别名]] 或 [[文件名]]
+		const match = linktext.match(/\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
+		if (match) {
+			return match[1]; // 返回 "ss"
+		}
+		return null;
+	}
+
 	createColumns = (app: any, properties: string[]) => {
 		let columns = [];
 		const firstColumn: ProColumns<any> = {
@@ -31,6 +48,9 @@ export class DashTableView extends BasesView {
 				return {
 					title: property,
 					dataIndex: property,
+					sorter: (a, b) => {
+						return a[property]?.display?.localeCompare(b[property]?.display);
+					},
 					render: (_, record) => {
 						const data = record[property];
 
@@ -45,8 +65,20 @@ export class DashTableView extends BasesView {
 						if (type == 'file' && name == 'name') {
 							return ellipsisLink(app, display, filePath);
 						}
+
+						if (type == 'file' && (name == 'links' || name == 'backlinks')) {
+							const linkTexts = display.split(',');
+							return linkTexts.map((linkText: string) => {
+								const path = this.parseWikilink(linkText) + ".md";
+								const displayName = this.getLinkDisplayName(linkText);
+
+								return <List.Item>
+									{ellipsisLink(app, displayName, path)}
+								</List.Item>
+							});
+						}
+
 						if (name == 'tags') {
-							console.log("tags", display);
 							const tag = display.split(',');
 							return tag.map((v: any) => {
 								if (typeof v === "object") {
@@ -108,18 +140,17 @@ export class DashTableView extends BasesView {
 			newDatas.push(newItem);
 
 		});
-
 		const columnsHead = this.createColumns(app, this.data.properties);
 
 		const container = this.containerEl.createDiv();
 		const root = createRoot(container);
-		root.render(<TableView app={app} source={""} columnsHead={columnsHead} data={newDatas}/>);
+		root.render(<TableView columnsHead={columnsHead} data={newDatas}/>);
 	}
 
 }
 
 const
-	TableView: React.FC<ViewProps> = ({app, source, columnsHead, data}) => {
+	TableView: React.FC<any> = ({columnsHead, data}) => {
 
 		const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
 
@@ -177,7 +208,7 @@ const
 						//	console.log('value: ', value);
 					},
 				}}
-				rowKey={(record) => record.key}
+				//rowKey={(record) => record.key}
 				search={{
 					labelWidth: 'auto',
 				}}
