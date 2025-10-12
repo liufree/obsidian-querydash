@@ -96,9 +96,6 @@ const
 	TableView: React.FC<ViewProps> = ({app, source, columnsHead, data}) => {
 
 		const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
-		const dv = getAPI(app);
-
-
 		function parseTableResult(rows: any, params: any): Array<Record<string, any>> {
 			delete params.current;
 			delete params.pageSize;
@@ -107,7 +104,7 @@ const
 				return Object.keys(params).every(key => {
 					if (params[key]) {
 						if (item[key]) {
-							return item[key].toString().toLowerCase().includes(params[key].toString().toLowerCase());
+							return item[key]?.display?.toString().toLowerCase().includes(params[key].toString().toLowerCase());
 						} else {
 							return true;
 						}
