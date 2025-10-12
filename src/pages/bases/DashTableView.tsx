@@ -1,10 +1,10 @@
-import {BasesPropertyId, BasesView, parsePropertyId, QueryController} from 'obsidian';
+import {BasesPropertyId, BasesView, MarkdownRenderer, parsePropertyId, QueryController} from 'obsidian';
 import {createRoot} from "react-dom/client";
 import React, {useEffect} from "react";
 import {ViewProps} from "../../models/ViewProps";
 import {ProColumns, ProTable} from "@ant-design/pro-components";
-import {ellipsisDisplay, formatValue} from "../GenerateColumns";
-import {getAPI} from "obsidian-dataview";
+import {ellipsisDisplay, ellipsisLink, externalLink} from "../GenerateColumns";
+import {List, Tag} from "antd";
 
 export const TableViewType = 'dash-table-view';
 
@@ -12,12 +12,13 @@ export class DashTableView extends BasesView {
 	readonly type = TableViewType;
 	private containerEl: HTMLElement;
 
+
 	constructor(controller: QueryController, parentEl: HTMLElement) {
 		super(controller);
 		this.containerEl = parentEl.createDiv('bases-example-view-container');
 	}
 
-	createColumns = (properties: string[]) => {
+	createColumns = (app: any, properties: string[]) => {
 		let columns = [];
 		const firstColumn: ProColumns<any> = {
 			dataIndex: 'index',
@@ -32,10 +33,40 @@ export class DashTableView extends BasesView {
 					dataIndex: property,
 					render: (_, record) => {
 						const data = record[property];
-						if (data === null || data === undefined) {
-							return "";
+
+						const filePath = record["file.path"];
+
+						const {type, name, display} = data || {};
+
+						if (display == 'null') {
+							return null;
 						}
-						return ellipsisDisplay(data?.display);
+
+						if (type == 'file' && name == 'name') {
+							return ellipsisLink(app, display, filePath);
+						}
+						if (name == 'tags') {
+							console.log("tags", display);
+							const tag = display.split(',');
+							return tag.map((v: any) => {
+								if (typeof v === "object") {
+									return <List.Item>
+										{ellipsisLink(app, v.display, v.name)}
+									</List.Item>
+								} else {
+									// tags
+									return <List.Item>
+										<Tag>{v || null}</Tag>
+									</List.Item>
+								}
+							})
+						}
+
+						if (type === "externalLink") {
+							return externalLink(display, name);
+						}
+
+						return ellipsisDisplay(display?.toString());
 					}
 				};
 			}
@@ -49,10 +80,6 @@ export class DashTableView extends BasesView {
 		const {app} = this;
 		this.containerEl.empty();
 
-		console.log(this.data.properties);
-
-		console.log(this.data.data);
-
 		let newDatas: Record<string, any> = []
 		const data = this.data.data;
 		data.map(item => {
@@ -60,10 +87,9 @@ export class DashTableView extends BasesView {
 			let newItem: Record<string, any> = {};
 
 			this.data.properties.map((prop: BasesPropertyId) => {
-				console.log(item.getValue(prop));
 
 				const {type, name} = parsePropertyId(prop);
-				console.log(type, name);
+
 				// `entry.getValue` returns the evaluated result of the property
 				// in the context of this entry.
 				const value = item.getValue(prop);
@@ -71,19 +97,19 @@ export class DashTableView extends BasesView {
 				const rowData = {
 					type: type,
 					name: name,
-					display: value
+					display: value?.toString() || "",
 				}
 				newItem[prop] = rowData
 			})
+
+			const filePath = item.getValue("file.path");
+			newItem["file.path"] = filePath
 
 			newDatas.push(newItem);
 
 		});
 
-		const columnsHead = this.createColumns(this.data.properties);
-
-		console.log(columnsHead);
-		console.log(newDatas);
+		const columnsHead = this.createColumns(app, this.data.properties);
 
 		const container = this.containerEl.createDiv();
 		const root = createRoot(container);
@@ -96,6 +122,7 @@ const
 	TableView: React.FC<ViewProps> = ({app, source, columnsHead, data}) => {
 
 		const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
+
 		function parseTableResult(rows: any, params: any): Array<Record<string, any>> {
 			delete params.current;
 			delete params.pageSize;
@@ -117,8 +144,6 @@ const
 		}
 
 		const executeTableQuery = async (datas: any, params: any) => {
-			const sql = source;
-
 			const queryResult = datas
 
 			const tableData: any = parseTableResult(queryResult, params);
@@ -171,7 +196,6 @@ const
 						data: tableData,
 						success: true,
 						total: tableData.length,
-						//	columns: columns,
 					});
 				}}
 			/>
