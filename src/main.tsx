@@ -17,7 +17,7 @@ export default class QueryDashPlugin extends Plugin {
 		});
 
 		this.registerBasesView(TableViewType, {
-			name: 'dash-table-view',
+			name: 'DashTableView',
 			icon: 'lucide-graduation-cap',
 			factory: (controller, containerEl) =>
 				new DashTableView(controller, containerEl)
