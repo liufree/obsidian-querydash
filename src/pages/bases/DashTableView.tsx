@@ -1,10 +1,11 @@
 import {BasesPropertyId, BasesView, MarkdownRenderer, parsePropertyId, QueryController} from 'obsidian';
 import {createRoot} from "react-dom/client";
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {ViewProps} from "../../models/ViewProps";
 import {ProColumns, ProTable} from "@ant-design/pro-components";
 import {ellipsisDisplay, ellipsisLink, externalLink} from "../GenerateColumns";
-import {List, Tag} from "antd";
+import {ConfigProvider, List, Tag, theme} from "antd";
+import enUS from "antd/locale/en_US";
 
 export const TableViewType = 'dash-table-view';
 
@@ -152,6 +153,10 @@ export class DashTableView extends BasesView {
 const
 	TableView: React.FC<any> = ({columnsHead, data}) => {
 
+		const [isDarkTheme, setIsDarkTheme] = useState<boolean>(
+			document.body.classList.contains("theme-dark")
+		);
+
 		const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
 
 		function parseTableResult(rows: any, params: any): Array<Record<string, any>> {
@@ -185,51 +190,76 @@ const
 		}
 
 		useEffect(() => {
-			//	console.log("source", source);
+			// Detect Obsidian's theme
+			const updateTheme = () => {
+				const isDark = document.body.classList.contains("theme-dark");
+				setIsDarkTheme(isDark);
+			};
+
+			// Initial theme detection
+			updateTheme();
+
+			// Listen for theme changes
+			const observer = new MutationObserver(updateTheme);
+			observer.observe(document.body, {attributes: true, attributeFilter: ["class"]});
+
+			return () => observer.disconnect();
 		}, []);
 
 
 		return (
-			<ProTable
-				scroll={{x: 'max-content'}}
-				cardBordered
-				editable={{
-					type: 'multiple',
+			<ConfigProvider
+				locale={enUS}
+				theme={{
+					algorithm: isDarkTheme ? theme.darkAlgorithm : theme.defaultAlgorithm,
+					// token: {
+					// 	colorPrimary: isDarkTheme ? "#1E90FF" : "#1890FF", // 自定义主色
+					// 	colorBgBase: isDarkTheme ? "#1F1F1F" : "#FFFFFF", // 自定义背景色
+					// 	colorText: isDarkTheme ? "#E0E0E0" : "#000000",  // 自定义文本颜色
+					// },
 				}}
-				columns={columns}
-				//	dataSource={data}
-				columnsState={{
-					persistenceKey: 'pro-table-singe-demos',
-					persistenceType: 'localStorage',
-					defaultValue: {
-						option: {fixed: 'right', disable: true},
-					},
-					onChange(value) {
-						//	console.log('value: ', value);
-					},
-				}}
-				//rowKey={(record) => record.key}
-				search={{
-					labelWidth: 'auto',
-				}}
-				pagination={{
-					showSizeChanger: true,
-				}}
-				headerTitle="TableView"
-				request={async (params, sort, filter) => {
-					//	console.log('params:', params);
-					const response = await executeTableQuery(data, params);
+			>
+				<ProTable
+					scroll={{x: 'max-content'}}
+					cardBordered
+					editable={{
+						type: 'multiple',
+					}}
+					columns={columns}
+					//	dataSource={data}
+					columnsState={{
+						persistenceKey: 'pro-table-singe-demos',
+						persistenceType: 'localStorage',
+						defaultValue: {
+							option: {fixed: 'right', disable: true},
+						},
+						onChange(value) {
+							//	console.log('value: ', value);
+						},
+					}}
+					//rowKey={(record) => record.key}
+					search={{
+						labelWidth: 'auto',
+					}}
+					pagination={{
+						showSizeChanger: true,
+					}}
+					headerTitle="TableView"
+					request={async (params, sort, filter) => {
+						//	console.log('params:', params);
+						const response = await executeTableQuery(data, params);
 
-					const {tableData, columns} = response;
+						const {tableData, columns} = response;
 
-					setColumns(columns);
-					return Promise.resolve({
-						data: tableData,
-						success: true,
-						total: tableData.length,
-					});
-				}}
-			/>
+						setColumns(columns);
+						return Promise.resolve({
+							data: tableData,
+							success: true,
+							total: tableData.length,
+						});
+					}}
+				/>
+			</ConfigProvider>
 		);
 	};
 
