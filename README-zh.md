@@ -1,5 +1,7 @@
+**Obsidian Bases Table View Support**
 
-
+QueryDash now supports views powered by the Obsidian Bases plugin. Thanks to the open API provided by Bases, users can
+seamlessly display and interact with Bases data in a flexible format.
 
 **项目目标**  
 QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不仅限于数据库功能。
@@ -19,8 +21,14 @@ QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不
 	- **分页**：优化大数据量下的浏览体验。
     - **任务**：支持任务管理，包括任务编辑。
 
-**使用教程**
+# **使用教程**
 
+## bases
+
+
+![DashTableView.png](docs/DashTableView.png)
+
+## dataview
 
 ~~~markdown
 ```querydash

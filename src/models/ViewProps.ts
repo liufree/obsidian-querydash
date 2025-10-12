@@ -1,6 +1,6 @@
 import {App} from "obsidian";
 
 export interface ViewProps {
-	app: App;
+	app: App ;
 	source: string;
 }
