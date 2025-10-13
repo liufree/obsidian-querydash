@@ -26,8 +26,6 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 
 	const executeTaskQuery = (dvApi: any, source: any, key: any) => {
 		dvApi.query(source).then((result: any) => {
-			console.log("queryResult", result);
-			console.log("key", key);
 			if (result.successful) {
 				const data = parseTaskData(result.value);
 				let filteredDataList = [...data]

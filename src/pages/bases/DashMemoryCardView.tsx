@@ -1,7 +1,7 @@
 import {BasesView, MarkdownRenderer, QueryController, TFile} from 'obsidian';
 import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Button, Space, Card} from 'antd';
+import {Button, Space, Card,Modal} from 'antd';
 import dayjs from 'dayjs';
 
 export const MemoryCardViewType = 'dash-memory-card-view';
@@ -81,12 +81,17 @@ const updateSRFrontmatter = async (
 		ease = ease + 0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02);
 		ease = Math.max(1.3, Number(ease.toFixed(2)));
 	}
-	const due = dayjs().add(interval, 'day').format('YYYY-MM-DD');
+	const due = dayjs().add(interval, 'day');
+	const now = dayjs();
+	if (due.diff(now, 'day') >= 365) {
+		Modal.success('恭喜已经掌握该卡片');
+		return;
+	}
 	await app.fileManager.processFrontMatter(file, (fm: Record<string, any>) => {
 		fm['sr-repetitions'] = repetitions;
 		fm['sr-interval'] = interval;
 		fm['sr-ease'] = ease;
-		fm['sr-due'] = due;
+		fm['sr-due'] = due.format('YYYY-MM-DD');
 		fm['sr-lapses'] = lapses;
 	});
 	refresh();
