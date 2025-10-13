@@ -1,7 +1,7 @@
 import {BasesView, MarkdownRenderer, QueryController, TFile} from 'obsidian';
 import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Button, Space, Card,Modal} from 'antd';
+import {Button, Space, Card, Modal, notification} from 'antd';
 import dayjs from 'dayjs';
 
 export const MemoryCardViewType = 'dash-memory-card-view';
@@ -56,9 +56,9 @@ const updateSRFrontmatter = async (
 	rating: 1 | 3 | 5,
 	refresh: () => void
 ) => {
-	if (!filePath) return;
+	if (!filePath) return false;
 	const file = app.vault.getAbstractFileByPath(filePath);
-	if (!(file instanceof TFile)) return;
+	if (!(file instanceof TFile)) return false;
 	let repetitions = Number(frontmatter?.['sr-repetitions']) || 0;
 	let interval = Number(frontmatter?.['sr-interval']) || 1;
 	let ease = Number(frontmatter?.['sr-ease']) || 2.5;
@@ -84,8 +84,7 @@ const updateSRFrontmatter = async (
 	const due = dayjs().add(interval, 'day');
 	const now = dayjs();
 	if (due.diff(now, 'day') >= 365) {
-		Modal.success('恭喜已经掌握该卡片');
-		return;
+		return true;
 	}
 	await app.fileManager.processFrontMatter(file, (fm: Record<string, any>) => {
 		fm['sr-repetitions'] = repetitions;
@@ -95,6 +94,7 @@ const updateSRFrontmatter = async (
 		fm['sr-lapses'] = lapses;
 	});
 	refresh();
+	return false;
 };
 
 const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, frontmatter}) => {
@@ -102,6 +102,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 	const [rendered, setRendered] = useState(false);
 	const [fm, setFM] = useState(frontmatter);
 	const [md, setMD] = useState(markdown);
+	const [showModal, setShowModal] = useState(false);
 
 	useEffect(() => {
 		setFM(frontmatter);
@@ -137,7 +138,8 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 		if (action === 'hard') rating = 1;
 		else if (action === 'medium') rating = 3;
 		else if (action === 'easy') rating = 5;
-		await updateSRFrontmatter(app, filePath, fm, rating, refresh);
+		const isDueOverYear = await updateSRFrontmatter(app, filePath, fm, rating, refresh);
+		if (isDueOverYear) setShowModal(true);
 	};
 
 	return (
@@ -173,11 +175,22 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 				justifyContent: 'center',
 			}}>
 				<Space>
-					<Button type="primary" danger onClick={() => handleDifficulty('hard')}>较难</Button>
-					<Button type="default" onClick={() => handleDifficulty('medium')}>中等</Button>
-					<Button type="primary" onClick={() => handleDifficulty('easy')}>简单</Button>
+					<Button type="primary" danger onClick={() => handleDifficulty('hard')}>hard</Button>
+					<Button type="default" onClick={() => handleDifficulty('medium')}>medium</Button>
+					<Button type="primary" onClick={() => handleDifficulty('easy')}>easy</Button>
 				</Space>
 			</div>
+			<Modal
+
+				open={showModal}
+				onCancel={() => setShowModal(false)}
+				footer={null}
+				centered
+			>
+				<div style={{textAlign: 'center', fontSize: 18, padding: '24px 0'}}>
+					Congratulations! You have memorized this note.
+				</div>
+			</Modal>
 		</>
 	);
 };
