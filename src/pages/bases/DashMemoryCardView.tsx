@@ -145,22 +145,34 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 	return (
 		<>
 			<Card style={{margin: '80px auto', padding: 24, marginBottom: 100}}>
-				<h2 style={{textAlign: 'center', marginBottom: 16}}>{title}</h2>
-				{fm && (
-					<div style={{marginBottom: 16}}>
-						<table style={{width: '100%', fontSize: 14, background: '#fafafa', borderRadius: 4}}>
-							<tbody>
-							{Object.entries(fm).map(([key, value]) => (
-								<tr key={key}>
-									<td style={{fontWeight: 'bold', padding: '2px 8px', width: 80}}>{key}</td>
-									<td style={{padding: '2px 8px'}}>{String(value)}</td>
-								</tr>
-							))}
-							</tbody>
-						</table>
+				<div style={{display: 'flex', alignItems: 'center'}}>
+					<div style={{flex: 1}}>
+						<h2 style={{textAlign: 'center', marginBottom: 16}}>{title}</h2>
+						{fm && (
+							<div style={{marginBottom: 16}}>
+								<table style={{width: '100%', fontSize: 14, background: '#fafafa', borderRadius: 4}}>
+									<tbody>
+									{Object.entries(fm).map(([key, value]) => (
+										<tr key={key}>
+											<td style={{fontWeight: 'bold', padding: '2px 8px', width: 80}}>{key}</td>
+											<td style={{padding: '2px 8px'}}>{String(value)}</td>
+										</tr>
+									))}
+									</tbody>
+								</table>
+							</div>
+						)}
+						<div ref={mdRef} style={{overflowY: 'auto', marginBottom: 32}}/>
 					</div>
-				)}
-				<div ref={mdRef} style={{overflowY: 'auto', marginBottom: 32}}/>
+					{/* 右侧箭头按钮 */}
+					<Button
+						onClick={() => {
+						}}
+						shape="circle"
+						icon={<span style={{fontSize: 20}}>&rarr;</span>}
+						style={{marginLeft: 16}}
+					/>
+				</div>
 			</Card>
 			<div style={{
 				position: 'fixed',
