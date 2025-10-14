@@ -33,8 +33,14 @@ more efficiently.
 
 ## bases
 
-
+## Table View
 ![DashTableView.png](docs/DashTableView.png)
+
+### Memory Card View
+Modeled after Anki-style flashcards; compatible with spaced repetition properties (sr-due, sr-interval, sr-ease, etc.) to make reviewing notes efficient.
+
+
+![DashMemoryCardView.png](docs/DashMemoryCardView.png)
 
 ## dataview 
 

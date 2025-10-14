@@ -25,8 +25,14 @@ QueryDash的目标是开发一款类似Notion Database的Obsidian插件，但不
 
 ## bases
 
-
+## Table视图
 ![DashTableView.png](docs/DashTableView.png)
+
+### 记忆卡片视图
+仿照anki记忆卡片, 兼容space repetition的属性, 方便复习
+
+![DashMemoryCardView.png](docs/DashMemoryCardView.png)
+
 
 ## dataview
 
