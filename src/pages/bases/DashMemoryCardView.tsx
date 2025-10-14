@@ -3,12 +3,16 @@ import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Button, Space, Card, Modal, notification} from 'antd';
 import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+dayjs.extend(isSameOrBefore);
 
 export const MemoryCardViewType = 'dash-memory-card-view';
 
 export class DashMemoryCardView extends BasesView {
 	readonly type = MemoryCardViewType;
 	private containerEl: HTMLElement;
+	private sortedCards: any[] = [];
+	private currentIndex: number = 0;
 
 	constructor(controller: QueryController, parentEl: HTMLElement) {
 		super(controller);
@@ -18,16 +22,33 @@ export class DashMemoryCardView extends BasesView {
 	public async onDataUpdated(): Promise<void> {
 		this.containerEl.empty();
 		const allCards = this.data.data;
-		let cardData = allCards[0];
-		if (allCards.length > 1) {
-			const sorted = allCards
-				.map(card => ({card, due: card.getValue('properties.sr-due')}))
-				.filter(item => item.due)
-				.sort((a, b) => dayjs(a.due).valueOf() - dayjs(b.due).valueOf());
-			if (sorted.length > 0) {
-				cardData = sorted[0].card;
+		// 按 sr-due 升序排序
+		this.sortedCards = [...allCards]
+			.map(card => ({card, due: card.getValue('properties.sr-due')}))
+			.sort((a, b) => {
+				if (!a.due && !b.due) return 0;
+				if (!a.due) return 1;
+				if (!b.due) return -1;
+				return dayjs(a.due).valueOf() - dayjs(b.due).valueOf();
+			})
+			.map(item => item.card);
+		// 找到 sr-due 最近的卡片
+		let idx = 0;
+		const now = dayjs();
+		for (let i = 0; i < this.sortedCards.length; i++) {
+			const due = this.sortedCards[i].getValue('properties.sr-due');
+			if (due && dayjs(due).isSameOrBefore(now, 'day')) {
+				idx = i;
+				break;
 			}
 		}
+		this.currentIndex = idx;
+		this.renderMemoryCard();
+	}
+
+	private async renderMemoryCard() {
+		const cardData = this.sortedCards[this.currentIndex];
+		if (!cardData) return;
 		const filePath = cardData?.getValue('file.path');
 		const filePathStr = typeof filePath === 'string' ? filePath : filePath?.toString() || '';
 		let markdownStr = '';
@@ -46,9 +67,36 @@ export class DashMemoryCardView extends BasesView {
 		}
 		const container = this.containerEl.createDiv();
 		const root = createRoot(container);
-		root.render(<MemoryCard markdown={markdownStr} app={this.app} filePath={filePathStr} title={title}
-								frontmatter={frontmatter}/>);
+		root.render(
+			<MemoryCard
+				markdown={markdownStr}
+				app={this.app}
+				filePath={filePathStr}
+				title={title}
+				frontmatter={frontmatter}
+				onPrev={this.handlePrev}
+				onNext={this.handleNext}
+				isPrevDisabled={this.currentIndex === 0}
+				isNextDisabled={this.currentIndex === this.sortedCards.length - 1}
+			/>
+		);
 	}
+
+	private handlePrev = () => {
+		if (this.currentIndex > 0) {
+			this.currentIndex--;
+			this.containerEl.empty();
+			this.renderMemoryCard();
+		}
+	};
+
+	private handleNext = () => {
+		if (this.currentIndex < this.sortedCards.length - 1) {
+			this.currentIndex++;
+			this.containerEl.empty();
+			this.renderMemoryCard();
+		}
+	};
 }
 
 interface MemoryCardProps {
@@ -57,6 +105,10 @@ interface MemoryCardProps {
 	filePath: string;
 	title: string;
 	frontmatter?: Record<string, any>;
+	onPrev: () => void;
+	onNext: () => void;
+	isPrevDisabled: boolean;
+	isNextDisabled: boolean;
 }
 
 const updateSRFrontmatter = async (
@@ -107,7 +159,7 @@ const updateSRFrontmatter = async (
 	return false;
 };
 
-const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, frontmatter}) => {
+const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, frontmatter, onPrev, onNext, isPrevDisabled, isNextDisabled}) => {
 	const mdRef = useRef<HTMLDivElement>(null);
 	const [rendered, setRendered] = useState(false);
 	const [fm, setFM] = useState(frontmatter);
@@ -156,22 +208,20 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 		<>
 			<Card style={{margin: '80px auto', padding: 24, marginBottom: 100}}>
 				<div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-					{/* 左侧箭头按钮 */}
 					<Button
-						onClick={() => {
-
-						}}
+						onClick={onPrev}
+						disabled={isPrevDisabled}
 						shape="circle"
 						icon={<span style={{fontSize: 20}}>&larr;</span>}
 						style={{marginRight: 32}}
 					/>
 					<div style={{flex: 1, maxWidth: 600}}>
 						<h2 style={{textAlign: 'center', marginBottom: 16}}>{title}</h2>
-						{fm && (
+						{frontmatter && (
 							<div style={{marginBottom: 16}}>
 								<table style={{width: '100%', fontSize: 14, background: '#fafafa', borderRadius: 4}}>
 									<tbody>
-									{Object.entries(fm).map(([key, value]) => (
+									{Object.entries(frontmatter).map(([key, value]) => (
 										<tr key={key}>
 											<td style={{fontWeight: 'bold', padding: '2px 8px', width: 80}}>{key}</td>
 											<td style={{padding: '2px 8px'}}>{String(value)}</td>
@@ -183,11 +233,9 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 						)}
 						<div ref={mdRef} style={{overflowY: 'auto', marginBottom: 32}}/>
 					</div>
-					{/* 右侧箭头按钮，始终居中显示 */}
 					<Button
-						onClick={() => {
-
-						}}
+						onClick={onNext}
+						disabled={isNextDisabled}
 						shape="circle"
 						icon={<span style={{fontSize: 20}}>&rarr;</span>}
 						style={{marginLeft: 32}}
