@@ -116,7 +116,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 				md,
 				mdRef.current,
 				filePath,
-				null
+			    this
 			);
 			setRendered(true);
 		}
@@ -145,8 +145,17 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 	return (
 		<>
 			<Card style={{margin: '80px auto', padding: 24, marginBottom: 100}}>
-				<div style={{display: 'flex', alignItems: 'center'}}>
-					<div style={{flex: 1}}>
+				<div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+					{/* 左侧箭头按钮 */}
+					<Button
+						onClick={() => {
+
+						}}
+						shape="circle"
+						icon={<span style={{fontSize: 20}}>&larr;</span>}
+						style={{marginRight: 32}}
+					/>
+					<div style={{flex: 1, maxWidth: 600}}>
 						<h2 style={{textAlign: 'center', marginBottom: 16}}>{title}</h2>
 						{fm && (
 							<div style={{marginBottom: 16}}>
@@ -164,13 +173,14 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 						)}
 						<div ref={mdRef} style={{overflowY: 'auto', marginBottom: 32}}/>
 					</div>
-					{/* 右侧箭头按钮 */}
+					{/* 右侧箭头按钮，始终居中显示 */}
 					<Button
 						onClick={() => {
+
 						}}
 						shape="circle"
 						icon={<span style={{fontSize: 20}}>&rarr;</span>}
-						style={{marginLeft: 16}}
+						style={{marginLeft: 32}}
 					/>
 				</div>
 			</Card>
