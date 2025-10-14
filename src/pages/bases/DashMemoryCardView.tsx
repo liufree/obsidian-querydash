@@ -17,7 +17,17 @@ export class DashMemoryCardView extends BasesView {
 
 	public async onDataUpdated(): Promise<void> {
 		this.containerEl.empty();
-		const cardData = this.data.data[0];
+		const allCards = this.data.data;
+		let cardData = allCards[0];
+		if (allCards.length > 1) {
+			const sorted = allCards
+				.map(card => ({card, due: card.getValue('properties.sr-due')}))
+				.filter(item => item.due)
+				.sort((a, b) => dayjs(a.due).valueOf() - dayjs(b.due).valueOf());
+			if (sorted.length > 0) {
+				cardData = sorted[0].card;
+			}
+		}
 		const filePath = cardData?.getValue('file.path');
 		const filePathStr = typeof filePath === 'string' ? filePath : filePath?.toString() || '';
 		let markdownStr = '';
