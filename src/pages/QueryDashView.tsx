@@ -14,7 +14,7 @@ interface QueryDashViewDashs {
 
 const QueryDashView: React.FC<QueryDashViewDashs> = ({app, source}) => {
 	const [sourceType, setSourceType] = useState<string>("table");
-	const [isDarkTheme, setIsDarkTheme] =  useState<boolean>(
+	const [isDarkTheme, setIsDarkTheme] = useState<boolean>(
 		document.body.classList.contains("theme-dark")
 	);
 
@@ -50,9 +50,10 @@ const QueryDashView: React.FC<QueryDashViewDashs> = ({app, source}) => {
 			return <ListView app={app} source={source}/>;
 		} else if (sourceType === "timeline") {
 			return <TimeLineView app={app} source={source}/>;
-		} else if (sourceType === "task") {
-			return <KanbanView app={app} source={source}/>;
 		}
+		/*else if (sourceType === "task") {
+			return <KanbanView app={app} source={source}/>;
+		}*/
 	};
 
 	return (

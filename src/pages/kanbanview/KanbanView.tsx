@@ -26,8 +26,6 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 
 	const executeTaskQuery = (dvApi: any, source: any, key: any) => {
 		dvApi.query(source).then((result: any) => {
-			console.log("queryResult", result);
-			console.log("key", key);
 			if (result.successful) {
 				const data = parseTaskData(result.value);
 				let filteredDataList = [...data]
@@ -120,34 +118,34 @@ const KanbanView: React.FC<ViewProps> = ({app, source}) => {
 	useEffect(() => {
 
 
-		const onModify = (file: TFile) => {
-			setTimeout(() => {
-				setRefresh((prev) => !prev); // 触发刷新
-			}, 300); // 延迟 500 毫秒，可根据实际情况调整
-			console.log("文件已修改:", file.path);
-		};
+		// const onModify = (file: TFile) => {
+		// 	setTimeout(() => {
+		// 		setRefresh((prev) => !prev); // 触发刷新
+		// 	}, 300); // 延迟 500 毫秒，可根据实际情况调整
+		// 	console.log("文件已修改:", file.path);
+		// };
+		//
+		// const onCreate = (file: TFile) => {
+		// 	console.log("文件已创建:", file.path);
+		// 	setRefresh(!refresh); // 触发刷新
+		// };
+		//
+		// const onDelete = (file: TFile) => {
+		// 	console.log("文件已删除:", file.path);
+		// 	setRefresh(!refresh); // 触发刷新
+		// };
 
-		const onCreate = (file: TFile) => {
-			console.log("文件已创建:", file.path);
-			setRefresh(!refresh); // 触发刷新
-		};
-
-		const onDelete = (file: TFile) => {
-			console.log("文件已删除:", file.path);
-			setRefresh(!refresh); // 触发刷新
-		};
-
-		// 监听文件事件
-		app.vault.on("modify", onModify);
-		app.vault.on("create", onCreate);
-		app.vault.on("delete", onDelete);
-
-		// 清理事件监听器
-		return () => {
-			app.vault.off("modify", onModify);
-			app.vault.off("create", onCreate);
-			app.vault.off("delete", onDelete);
-		};
+		// // 监听文件事件
+		// app.vault.on("modify", onModify);
+		// app.vault.on("create", onCreate);
+		// app.vault.on("delete", onDelete);
+		//
+		// // 清理事件监听器
+		// return () => {
+		// 	app.vault.off("modify", onModify);
+		// 	app.vault.off("create", onCreate);
+		// 	app.vault.off("delete", onDelete);
+		// };
 	}, [app]);
 
 	const cardDetails = (dataList: any) => {

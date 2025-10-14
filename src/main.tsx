@@ -2,6 +2,7 @@ import {Plugin} from 'obsidian';
 import ReactComponent from "./pages/ReactComponent";
 import {Root} from 'react-dom/client';
 import {DashTableView, TableViewType} from "./pages/bases/DashTableView";
+import {DashMemoryCardView, MemoryCardViewType} from "./pages/bases/DashMemoryCardView";
 
 
 export default class QueryDashPlugin extends Plugin {
@@ -21,6 +22,13 @@ export default class QueryDashPlugin extends Plugin {
 			icon: 'lucide-graduation-cap',
 			factory: (controller, containerEl) =>
 				new DashTableView(controller, containerEl)
+		});
+
+		this.registerBasesView(MemoryCardViewType, {
+			name: 'DashMemoryCardView',
+			icon: 'lucide-graduation-cap',
+			factory: (controller, containerEl) =>
+				new DashMemoryCardView(controller, containerEl)
 		});
 
 	}
