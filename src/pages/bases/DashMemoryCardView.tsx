@@ -1,4 +1,4 @@
-import {BasesView, MarkdownRenderer, QueryController, TFile} from 'obsidian';
+import {BasesView, MarkdownRenderer, QueryController, TFile,Component} from 'obsidian';
 import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Button, Space, Card, Modal, notification} from 'antd';
@@ -173,12 +173,13 @@ const MemoryCard: React.FC<MemoryCardProps> = ({markdown, app, filePath, title, 
 
 	useEffect(() => {
 		if (mdRef.current && !rendered) {
+			// 修正：传递一个 Obsidian Component 实例，避免内存泄漏
 			MarkdownRenderer.render(
 				app,
 				md,
 				mdRef.current,
 				filePath,
-			    this
+				null
 			);
 			setRendered(true);
 		}
