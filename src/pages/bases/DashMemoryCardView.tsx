@@ -176,37 +176,24 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 	const mdRef = useRef<HTMLDivElement>(null);
 	const [rendered, setRendered] = useState(false);
 	const [fm, setFM] = useState(frontmatter);
-	const [md, setMD] = useState(markdown);
 	const [showModal, setShowModal] = useState(false);
-
-	useEffect(() => {
-		setFM(frontmatter);
-		setMD(markdown);
-	}, [frontmatter, markdown]);
 
 	useEffect(() => {
 		if (mdRef.current && !rendered) {
 			// 修正：传递一个 Obsidian Component 实例，避免内存泄漏
 			MarkdownRenderer.render(
 				app,
-				md,
+				markdown,
 				mdRef.current,
 				filePath,
 				null
 			);
 			setRendered(true);
 		}
-	}, [md, app, filePath, rendered]);
+	}, [markdown, app, filePath]);
 
 	const refresh = async () => {
-		const file = app.vault.getAbstractFileByPath(filePath);
-		if (file instanceof TFile) {
-			const newMD = await app.vault.read(file);
-			setMD(newMD);
-			const cache = app.metadataCache.getFileCache(file);
-			setFM(cache?.frontmatter);
-			setRendered(false);
-		}
+
 	};
 
 	const handleDifficulty = async (action: 'hard' | 'medium' | 'easy') => {
