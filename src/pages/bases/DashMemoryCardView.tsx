@@ -209,13 +209,6 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 		<>
 			<Card style={{margin: '80px auto', padding: 24, marginBottom: 100}}>
 				<div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-					<Button
-						onClick={onPrev}
-						disabled={isPrevDisabled}
-						shape="circle"
-						icon={<span style={{fontSize: 20}}>&larr;</span>}
-						style={{marginRight: 32}}
-					/>
 					<div style={{flex: 1, maxWidth: 600}}>
 						<h2 style={{textAlign: 'center', marginBottom: 16}}>{title}</h2>
 						{frontmatter && (
@@ -234,13 +227,6 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 						)}
 						<div ref={mdRef} style={{overflowY: 'auto', marginBottom: 32}}/>
 					</div>
-					<Button
-						onClick={onNext}
-						disabled={isNextDisabled}
-						shape="circle"
-						icon={<span style={{fontSize: 20}}>&rarr;</span>}
-						style={{marginLeft: 32}}
-					/>
 				</div>
 			</Card>
 			<div style={{
@@ -256,9 +242,39 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 				justifyContent: 'center',
 			}}>
 				<Space>
-					<Button type="primary" danger onClick={() => handleDifficulty('hard')}>hard</Button>
-					<Button type="default" onClick={() => handleDifficulty('medium')}>medium</Button>
-					<Button type="primary" onClick={() => handleDifficulty('easy')}>easy</Button>
+					<Button
+						style={{marginRight: 30}}
+						onClick={onPrev}
+						disabled={isPrevDisabled}
+						type="default"
+					>
+						prev
+					</Button>
+					<Button type="primary" danger onClick={() => handleDifficulty('hard')}>
+						hard
+					</Button>
+					<Button
+						type="default"
+						style={{backgroundColor: '#87CEEB', color: '#000'}} // SkyBlue for medium
+						onClick={() => handleDifficulty('medium')}
+					>
+						medium
+					</Button>
+					<Button
+						type="primary"
+						style={{backgroundColor: '#98FB98', color: '#000'}} // PaleGreen for easy
+						onClick={() => handleDifficulty('easy')}
+					>
+						easy
+					</Button>
+					<Button
+						style={{marginLeft: 30}}
+						onClick={onNext}
+						disabled={isNextDisabled}
+						type="default"
+					>
+						next
+					</Button>
 				</Space>
 			</div>
 			<Modal
