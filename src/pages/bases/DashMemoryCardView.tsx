@@ -565,6 +565,96 @@ ${content}`;
 	}
 };
 
+// 简单的Markdown渲染组件，使用Obsidian原生样式
+const SimpleMarkdownView: React.FC<{
+	markdown: string;
+	app: any;
+	filePath: string;
+}> = ({ markdown, app, filePath }) => {
+	const containerRef = useRef<HTMLDivElement>(null);
+	
+	useEffect(() => {
+		if (!containerRef.current) return;
+		
+		const container = containerRef.current;
+		
+		// 清空容器
+		container.innerHTML = '';
+		
+		// 创建一个div来包装markdown内容
+		const markdownContainer = document.createElement('div');
+		markdownContainer.className = 'markdown-reading-view markdown-rendered';
+		markdownContainer.style.cssText = `
+			width: 100%;
+			height: 100%;
+			overflow-y: auto;
+			padding: 0;
+			font-family: var(--font-text);
+			line-height: var(--line-height-normal);
+			color: var(--text-normal);
+		`;
+		
+		container.appendChild(markdownContainer);
+		
+		// 使用Obsidian的MarkdownRenderer
+		MarkdownRenderer.renderMarkdown(
+			markdown,
+			markdownContainer,
+			filePath,
+			null as any
+		);
+		
+		// 添加Obsidian的阅读模式样式
+		setTimeout(() => {
+			// 确保所有元素都有正确的Obsidian类
+			const elements = markdownContainer.querySelectorAll('*');
+			elements.forEach(el => {
+				// 代码块
+				if (el.tagName === 'PRE' && el.querySelector('code')) {
+					el.classList.add('code-block');
+					el.classList.add('code-block-wrap');
+				}
+				// 内联代码
+				if (el.tagName === 'CODE' && !el.closest('pre')) {
+					el.classList.add('inline-code');
+				}
+				// 链接
+				if (el.tagName === 'A') {
+					const href = el.getAttribute('href');
+					if (href?.startsWith('#')) {
+						el.classList.add('internal-link');
+					} else if (href && !href.startsWith('http') && !href.startsWith('mailto:')) {
+						el.classList.add('internal-link');
+						// 添加点击事件
+						el.addEventListener('click', async (e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							await app.workspace.openLinkText(href, filePath, true, { active: true });
+						});
+					} else {
+						el.classList.add('external-link');
+					}
+				}
+				// 表格
+				if (el.tagName === 'TABLE') {
+					el.classList.add('table-view-table');
+				}
+				// 引用
+				if (el.tagName === 'BLOCKQUOTE') {
+					el.classList.add('blockquote');
+				}
+				// 任务列表
+				if (el.tagName === 'UL' && el.classList.contains('contains-task-list')) {
+					el.classList.add('contains-task-list');
+				}
+			});
+		}, 100);
+		
+	}, [markdown, app, filePath]);
+	
+	return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
+};
+
 const MemoryCard: React.FC<MemoryCardProps> = ({
 												   markdown,
 												   app,
@@ -579,53 +669,8 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 												   currentFileIndex = 0,
 												   onFileSelect = () => {}
 											   }) => {
-	const mdRef = useRef<HTMLDivElement>(null);
-	const [rendered, setRendered] = useState(false);
 	const [fm, setFM] = useState(frontmatter);
 	const [showModal, setShowModal] = useState(false);
-
-	useEffect(() => {
-		if (mdRef.current && !rendered) {
-			try {
-				// 使用renderMarkdown方法渲染markdown
-				// 这个方法更适合在React组件中使用
-				MarkdownRenderer.renderMarkdown(
-					markdown,
-					mdRef.current,
-					filePath,
-					null as any
-				);
-				setRendered(true);
-				
-				// 添加一些自定义样式到渲染的markdown内容
-				setTimeout(() => {
-					if (mdRef.current) {
-						// 为渲染的markdown内容添加一些样式
-						const elements = mdRef.current.querySelectorAll('h1, h2, h3, h4, h5, h6');
-						elements.forEach(el => {
-							(el as HTMLElement).style.color = '#1890ff';
-						});
-						
-						// 为代码块添加样式
-						const codeBlocks = mdRef.current.querySelectorAll('pre code');
-						codeBlocks.forEach(el => {
-							(el as HTMLElement).style.background = '#f6f8fa';
-							(el as HTMLElement).style.padding = '12px';
-							(el as HTMLElement).style.borderRadius = '6px';
-							(el as HTMLElement).style.display = 'block';
-							(el as HTMLElement).style.overflowX = 'auto';
-						});
-					}
-				}, 100);
-			} catch (error) {
-				console.error('Error rendering markdown:', error);
-				// 如果渲染失败，直接显示原始markdown
-				if (mdRef.current) {
-					mdRef.current.innerHTML = markdown;
-				}
-			}
-		}
-	}, [markdown, app, filePath]);
 
 	const refresh = async () => {
 		// 刷新数据：重新获取卡片数据并重新渲染
@@ -1160,9 +1205,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 								</div>
 							</div>
 							
-							<div 
-								ref={mdRef} 
-								style={{
+							<div style={{
 									overflowY: 'auto',
 									maxHeight: 'calc(100vh - 400px)',
 									minHeight: '300px',
@@ -1173,8 +1216,13 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 									boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.04)',
 									position: 'relative',
 									zIndex: 1
-								}}
-							/>
+								}}>
+								<SimpleMarkdownView 
+									markdown={markdown}
+									app={app}
+									filePath={filePath}
+								/>
+							</div>
 						</Card>
 					</div>
 				</div>
