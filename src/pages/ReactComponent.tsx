@@ -15,12 +15,20 @@ export  default class ReactComponent extends MarkdownRenderChild {
 	}
 
 	onload() {
+		super.onload();
 		this.renderReactComponent();
 	}
 
 	renderReactComponent() {
-
 		const root = createRoot(this.container);
-		root.render(<QueryDashView app={this.app} source={this.source}   />);
+		this.root = root;
+		root.render(<QueryDashView app={this.app} source={this.source} />);
+	}
+	
+	onunload() {
+		if (this.root) {
+			this.root.unmount();
+		}
+		super.onunload();
 	}
 }
