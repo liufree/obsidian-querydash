@@ -509,18 +509,60 @@ const updateSRFrontmatter = async (
 		return true;
 	}
 	
-	// 更新frontmatter
-	await app.fileManager.processFrontMatter(file, (fm: Record<string, any>) => {
-		fm['sr-repetitions'] = repetitions;
-		fm['sr-interval'] = interval;
-		fm['sr-ease'] = ease;
-		fm['sr-due'] = due.format('YYYY-MM-DD');
-		fm['sr-lapses'] = lapses;
-	});
-	
-	// 触发刷新
-	refresh();
-	return false;
+	try {
+		// 更新frontmatter
+		await app.fileManager.processFrontMatter(file, (fm: Record<string, any>) => {
+			fm['sr-repetitions'] = repetitions;
+			fm['sr-interval'] = interval;
+			fm['sr-ease'] = ease;
+			fm['sr-due'] = due.format('YYYY-MM-DD');
+			fm['sr-lapses'] = lapses;
+		});
+		
+		// 触发刷新
+		refresh();
+		return false;
+	} catch (error) {
+		console.error('Error in processFrontMatter:', error);
+		// 如果processFrontMatter失败，尝试直接写入文件
+		try {
+			const content = await app.vault.read(file);
+			const frontmatterRegex = /^---\s*[\s\S]*?---\s*/;
+			const hasFrontmatter = frontmatterRegex.test(content);
+			
+			let newContent = '';
+			if (hasFrontmatter) {
+				// 替换现有的frontmatter
+				const frontmatterStr = `---
+sr-repetitions: ${repetitions}
+sr-interval: ${interval}
+sr-ease: ${ease}
+sr-due: ${due.format('YYYY-MM-DD')}
+sr-lapses: ${lapses}
+---`;
+				newContent = content.replace(frontmatterRegex, frontmatterStr + '\n');
+			} else {
+				// 添加新的frontmatter
+				const frontmatterStr = `---
+sr-repetitions: ${repetitions}
+sr-interval: ${interval}
+sr-ease: ${ease}
+sr-due: ${due.format('YYYY-MM-DD')}
+sr-lapses: ${lapses}
+---
+
+${content}`;
+				newContent = frontmatterStr;
+			}
+			
+			await app.vault.modify(file, newContent);
+			refresh();
+			return false;
+		} catch (writeError) {
+			console.error('Error writing file directly:', writeError);
+			throw new Error(`无法更新文件 ${filePath}: ${writeError.message}`);
+		}
+	}
 };
 
 const MemoryCard: React.FC<MemoryCardProps> = ({
@@ -593,37 +635,97 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 	};
 
 	const handleDifficulty = async (action: 'hard' | 'medium' | 'easy') => {
-		let rating: 1 | 3 | 5 = 3;
-		if (action === 'hard') rating = 1;
-		else if (action === 'medium') rating = 3;
-		else if (action === 'easy') rating = 5;
-		const isDueOverYear = await updateSRFrontmatter(app, filePath, fm, rating, refresh);
-		if (isDueOverYear) {
-			setShowModal(true);
+		try {
+			let rating: 1 | 3 | 5 = 3;
+			if (action === 'hard') rating = 1;
+			else if (action === 'medium') rating = 3;
+			else if (action === 'easy') rating = 5;
+			const isDueOverYear = await updateSRFrontmatter(app, filePath, fm, rating, refresh);
+			if (isDueOverYear) {
+				setShowModal(true);
+			}
+		} catch (error) {
+			console.error('Error updating SR frontmatter:', error);
+			// 显示错误提示
+			notification.error({
+				message: '更新失败',
+				description: '无法更新记忆卡片状态，请检查文件是否有frontmatter',
+				duration: 3,
+			});
+		} finally {
+			// 无论成功与否，都跳转到下一个卡片
+			onNext();
 		}
-		// 评分后自动跳转到下一个卡片
-		onNext();
 	};
 
 	return (
 		<>
-			<div style={{display: 'flex', height: 'calc(100vh - 100px)', marginTop: '20px'}}>
+			<div style={{display: 'flex', height: 'calc(100vh - 80px)', margin: 0}}>
 				{/* 左侧文件列表 */}
 				{fileList.length > 0 && (
 					<div style={{
-						width: '300px',
-						borderRight: '1px solid #f0f0f0',
+						width: '320px',
+						borderRight: '1px solid #e8e8e8',
 						overflowY: 'auto',
-						padding: '16px',
-						background: '#fafafa'
+						padding: '20px',
+						background: 'linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%)',
+						boxShadow: '2px 0 8px rgba(0,0,0,0.05)'
 					}}>
-						<h3 style={{marginBottom: '16px', color: '#1890ff'}}>
-							📚 复习列表 ({fileList.length})
-						</h3>
-						<div style={{fontSize: '12px', color: '#666', marginBottom: '12px'}}>
-							点击文件快速切换
+						<div style={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+							marginBottom: '20px',
+							paddingBottom: '12px',
+							borderBottom: '2px solid #1890ff'
+						}}>
+							<h3 style={{
+								margin: 0,
+								color: '#1890ff',
+								fontSize: '18px',
+								fontWeight: '600',
+								display: 'flex',
+								alignItems: 'center',
+								gap: '8px'
+							}}>
+								<span style={{
+									background: '#1890ff',
+									color: 'white',
+									width: '28px',
+									height: '28px',
+									borderRadius: '50%',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									fontSize: '14px'
+								}}>
+									📚
+								</span>
+								复习列表
+							</h3>
+							<span style={{
+								background: '#1890ff',
+								color: 'white',
+								fontSize: '12px',
+								fontWeight: 'bold',
+								padding: '4px 10px',
+								borderRadius: '12px'
+							}}>
+								{fileList.length}
+							</span>
 						</div>
-						<div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+						<div style={{
+							fontSize: '13px',
+							color: '#666',
+							marginBottom: '16px',
+							padding: '10px',
+							background: 'rgba(24, 144, 255, 0.05)',
+							borderRadius: '6px',
+							borderLeft: '3px solid #1890ff'
+						}}>
+							💡 点击文件快速切换
+						</div>
+						<div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
 							{fileList.map((file, idx) => {
 								const isCurrent = file.index === currentFileIndex;
 								const isNewCard = file.isNew;
@@ -644,82 +746,159 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 										key={`file-${file.index}-${file.title}`}
 										onClick={() => onFileSelect(file.index)}
 										style={{
-											padding: '12px',
-											borderRadius: '6px',
+											padding: '16px',
+											borderRadius: '10px',
 											border: isCurrent ? '2px solid #1890ff' : '1px solid #e8e8e8',
-											background: isCurrent ? '#e6f7ff' : '#fff',
+											background: isCurrent 
+												? 'linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%)' 
+												: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
 											cursor: 'pointer',
-											transition: 'all 0.2s',
+											transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 											position: 'relative',
-											overflow: 'hidden'
+											overflow: 'hidden',
+											boxShadow: isCurrent 
+												? '0 4px 12px rgba(24, 144, 255, 0.2)' 
+												: '0 2px 6px rgba(0,0,0,0.05)'
 										}}
 										onMouseEnter={(e) => {
-											e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-											e.currentTarget.style.transform = 'translateY(-2px)';
+											if (!isCurrent) {
+												e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)';
+												e.currentTarget.style.transform = 'translateY(-3px)';
+												e.currentTarget.style.borderColor = '#69c0ff';
+											}
 										}}
 										onMouseLeave={(e) => {
-											e.currentTarget.style.boxShadow = 'none';
-											e.currentTarget.style.transform = 'translateY(0)';
+											if (!isCurrent) {
+												e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
+												e.currentTarget.style.transform = 'translateY(0)';
+												e.currentTarget.style.borderColor = '#e8e8e8';
+											}
 										}}
 									>
-										<div style={{
-											display: 'flex',
-											justifyContent: 'space-between',
-											alignItems: 'center',
-											marginBottom: '4px'
-										}}>
-											<div style={{
-												fontWeight: isCurrent ? 'bold' : 'normal',
-												color: isCurrent ? '#1890ff' : '#333',
-												fontSize: '14px',
-												overflow: 'hidden',
-												textOverflow: 'ellipsis',
-												whiteSpace: 'nowrap'
-											}}>
-												{isCurrent && '▶ '}
-												{file.title}
-											</div>
-											{isNewCard ? (
-												<span style={{
-													background: '#52c41a',
-													color: 'white',
-													fontSize: '10px',
-													padding: '2px 6px',
-													borderRadius: '10px'
-												}}>
-													新
-												</span>
-											) : isOverdue ? (
-												<span style={{
-													background: '#ff4d4f',
-													color: 'white',
-													fontSize: '10px',
-													padding: '2px 6px',
-													borderRadius: '10px'
-												}}>
-													逾期
-												</span>
-											) : null}
-										</div>
-										<div style={{
-											fontSize: '12px',
-											color: isNewCard ? '#52c41a' : (isOverdue ? '#ff4d4f' : '#666'),
-											display: 'flex',
-											justifyContent: 'space-between'
-										}}>
-											<span>
-												{isNewCard ? '🆕 新卡片' : `到期: ${dueDate ? dueDate.format('MM-DD') : file.due}`}
-											</span>
-											<span>#{idx + 1}</span>
-										</div>
 										{isCurrent && (
 											<div style={{
 												position: 'absolute',
 												top: 0,
-												right: 0,
-												width: '4px',
+												left: 0,
+												width: '6px',
 												height: '100%',
-												background: '#1890ff'
+												background: 'linear-gradient(to bottom, #1890ff, #096dd9)',
+												borderRadius: '10px 0 0 10px'
+											}}/>
+										)}
+										<div style={{
+											display: 'flex',
+											justifyContent: 'space-between',
+											alignItems: 'flex-start',
+											marginBottom: '8px',
+											position: 'relative',
+											zIndex: 1
+										}}>
+											<div style={{
+												flex: 1,
+												minWidth: 0
+											}}>
+												<div style={{
+													display: 'flex',
+													alignItems: 'center',
+													gap: '8px',
+													marginBottom: '4px'
+												}}>
+													{isCurrent && (
+														<span style={{
+															background: '#1890ff',
+															color: 'white',
+															width: '20px',
+															height: '20px',
+															borderRadius: '50%',
+															display: 'flex',
+															alignItems: 'center',
+															justifyContent: 'center',
+															fontSize: '12px',
+															fontWeight: 'bold'
+														}}>
+															▶
+														</span>
+													)}
+													<div style={{
+														fontWeight: isCurrent ? '700' : '600',
+														color: isCurrent ? '#1890ff' : '#333',
+														fontSize: '15px',
+														overflow: 'hidden',
+														textOverflow: 'ellipsis',
+														whiteSpace: 'nowrap',
+														lineHeight: '1.4'
+													}}>
+														{file.title}
+													</div>
+												</div>
+												<div style={{
+													fontSize: '12px',
+													color: isNewCard ? '#52c41a' : (isOverdue ? '#ff4d4f' : '#666'),
+													display: 'flex',
+													alignItems: 'center',
+													gap: '6px',
+													marginTop: '4px'
+												}}>
+													<span style={{
+														display: 'flex',
+														alignItems: 'center',
+														gap: '4px'
+													}}>
+														{isNewCard ? '🆕' : (isOverdue ? '⚠️' : '📅')}
+														{isNewCard ? '新卡片' : `到期: ${dueDate ? dueDate.format('MM-DD') : file.due}`}
+													</span>
+												</div>
+											</div>
+											<div style={{
+												display: 'flex',
+												flexDirection: 'column',
+												alignItems: 'flex-end',
+												gap: '4px'
+											}}>
+												{isNewCard ? (
+													<span style={{
+														background: 'linear-gradient(135deg, #52c41a, #73d13d)',
+														color: 'white',
+														fontSize: '11px',
+														fontWeight: 'bold',
+														padding: '3px 8px',
+														borderRadius: '12px',
+														boxShadow: '0 2px 4px rgba(82, 196, 26, 0.3)'
+													}}>
+														新
+													</span>
+												) : isOverdue ? (
+													<span style={{
+														background: 'linear-gradient(135deg, #ff4d4f, #ff7875)',
+														color: 'white',
+														fontSize: '11px',
+														fontWeight: 'bold',
+														padding: '3px 8px',
+														borderRadius: '12px',
+														boxShadow: '0 2px 4px rgba(255, 77, 79, 0.3)'
+													}}>
+														逾期
+													</span>
+												) : null}
+												<span style={{
+													fontSize: '12px',
+													color: '#999',
+													fontWeight: '500'
+												}}>
+													#{idx + 1}
+												</span>
+											</div>
+										</div>
+										{isCurrent && (
+											<div style={{
+												position: 'absolute',
+												bottom: 0,
+												right: 0,
+												width: '40px',
+												height: '40px',
+												background: 'radial-gradient(circle at 100% 100%, rgba(24, 144, 255, 0.1) 0%, transparent 70%)',
+												borderRadius: '0 0 10px 0'
 											}}/>
 										)}
 									</div>
@@ -730,140 +909,468 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 				)}
 				
 				{/* 右侧卡片内容 */}
-				<div style={{flex: 1, overflowY: 'auto', padding: '20px'}}>
-					<Card style={{maxWidth: '800px', margin: '0 auto', padding: '24px'}}>
-						<h2 style={{textAlign: 'center', marginBottom: '16px', color: '#1890ff'}}>
-							{title}
-						</h2>
-						{frontmatter && (
-							<div style={{marginBottom: '16px'}}>
+				<div style={{
+					flex: 1,
+					overflowY: 'auto',
+					padding: '30px',
+					background: 'linear-gradient(135deg, #f0f2f5 0%, #e6f7ff 100%)',
+					position: 'relative'
+				}}>
+					<div style={{
+						maxWidth: '1000px',
+						margin: '0 auto',
+						position: 'relative'
+					}}>
+						<Card style={{
+							padding: '32px',
+							borderRadius: '16px',
+							boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+							border: '1px solid rgba(24, 144, 255, 0.1)',
+							background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+							position: 'relative',
+							overflow: 'hidden'
+						}}>
+							{/* 装饰性背景元素 */}
+							<div style={{
+								position: 'absolute',
+								top: 0,
+								right: 0,
+								width: '200px',
+								height: '200px',
+								background: 'radial-gradient(circle at 100% 0%, rgba(24, 144, 255, 0.05) 0%, transparent 70%)',
+								borderRadius: '0 0 0 100%'
+							}}/>
+							
+							<div style={{
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								marginBottom: '24px',
+								paddingBottom: '16px',
+								borderBottom: '2px solid #e6f7ff',
+								position: 'relative',
+								zIndex: 1
+							}}>
+								<h2 style={{
+									margin: 0,
+									color: '#1890ff',
+									fontSize: '28px',
+									fontWeight: '700',
+									display: 'flex',
+									alignItems: 'center',
+									gap: '12px'
+								}}>
+									<span style={{
+										background: 'linear-gradient(135deg, #1890ff, #096dd9)',
+										color: 'white',
+										width: '40px',
+										height: '40px',
+										borderRadius: '50%',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										fontSize: '20px',
+										boxShadow: '0 4px 12px rgba(24, 144, 255, 0.3)'
+									}}>
+										📄
+									</span>
+									{title}
+								</h2>
+								<div style={{
+									display: 'flex',
+									alignItems: 'center',
+									gap: '12px'
+								}}>
+									{fileList.length > 0 && (
+										<div style={{
+											background: 'linear-gradient(135deg, #f6ffed, #d9f7be)',
+											padding: '8px 16px',
+											borderRadius: '20px',
+											fontSize: '14px',
+											fontWeight: '600',
+											color: '#52c41a',
+											display: 'flex',
+											alignItems: 'center',
+											gap: '8px',
+											boxShadow: '0 2px 8px rgba(82, 196, 26, 0.1)'
+										}}>
+											<span>📊</span>
+											<span>进度: {fileList.findIndex(f => f.index === currentFileIndex) + 1}/{fileList.length}</span>
+										</div>
+									)}
+								</div>
+							</div>
+							
+							{frontmatter && (
+								<div style={{
+									marginBottom: '24px',
+									background: 'linear-gradient(135deg, #f6ffed, #e6fffb)',
+									borderRadius: '12px',
+									padding: '20px',
+									border: '1px solid #b7eb8f',
+									boxShadow: '0 4px 12px rgba(183, 235, 143, 0.1)',
+									position: 'relative',
+									zIndex: 1
+								}}>
+									<div style={{
+										display: 'flex',
+										alignItems: 'center',
+										gap: '10px',
+										marginBottom: '16px'
+									}}>
+										<div style={{
+											background: '#52c41a',
+											color: 'white',
+											width: '32px',
+											height: '32px',
+											borderRadius: '50%',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											fontSize: '16px'
+										}}>
+											📊
+										</div>
+										<h3 style={{
+											margin: 0,
+											color: '#52c41a',
+											fontSize: '18px',
+											fontWeight: '600'
+										}}>
+											记忆状态
+										</h3>
+									</div>
+									<div style={{
+										display: 'grid',
+										gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+										gap: '16px'
+									}}>
+										{Object.entries(frontmatter)
+											.filter(([key]) => key.startsWith('sr-'))
+											.map(([key, value]) => (
+												<div key={key} style={{
+													background: 'white',
+													padding: '16px',
+													borderRadius: '10px',
+													border: '1px solid #d9f7be',
+													boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+													transition: 'all 0.3s'
+												}}>
+													<div style={{
+														fontSize: '12px',
+														color: '#666',
+														marginBottom: '6px',
+														fontWeight: '500',
+														textTransform: 'uppercase',
+														letterSpacing: '0.5px'
+													}}>
+														{key.replace('sr-', '')}
+													</div>
+													<div style={{
+														fontSize: '18px',
+														fontWeight: '700',
+														color: '#1890ff',
+														display: 'flex',
+														alignItems: 'center',
+														gap: '8px'
+													}}>
+														{String(value)}
+														{key === 'sr-due' && (
+															<span style={{
+																fontSize: '12px',
+																background: dayjs(value as string).isBefore(dayjs(), 'day') 
+																	? '#fff2f0' 
+																	: '#f6ffed',
+																color: dayjs(value as string).isBefore(dayjs(), 'day')
+																	? '#ff4d4f'
+																	: '#52c41a',
+																padding: '2px 8px',
+																borderRadius: '10px',
+																fontWeight: '500'
+															}}>
+																{dayjs(value as string).isBefore(dayjs(), 'day') ? '逾期' : '进行中'}
+															</span>
+														)}
+													</div>
+												</div>
+											))}
+									</div>
+								</div>
+							)}
+							
+							<div style={{
+								marginBottom: '24px',
+								background: 'linear-gradient(135deg, #f0f8ff, #e6f7ff)',
+								borderRadius: '12px',
+								padding: '20px',
+								border: '1px solid #91d5ff',
+								position: 'relative',
+								zIndex: 1,
+								boxShadow: '0 4px 12px rgba(145, 213, 255, 0.1)'
+							}}>
+								<div style={{
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'space-between',
+									marginBottom: '12px'
+								}}>
+									<div style={{
+										display: 'flex',
+										alignItems: 'center',
+										gap: '10px'
+									}}>
+										<div style={{
+											background: '#1890ff',
+											color: 'white',
+											width: '32px',
+											height: '32px',
+											borderRadius: '50%',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											fontSize: '16px'
+										}}>
+											📝
+										</div>
+										<div style={{
+											fontSize: '16px',
+											fontWeight: '600',
+											color: '#1890ff'
+										}}>
+											内容预览
+										</div>
+									</div>
+									<div style={{
+										fontSize: '13px',
+										color: '#666',
+										background: 'white',
+										padding: '4px 12px',
+										borderRadius: '12px',
+										border: '1px solid #91d5ff'
+									}}>
+										{markdown.length > 0 ? `${Math.ceil(markdown.length / 1000)}k 字符` : '空内容'}
+									</div>
+								</div>
 								<div style={{
 									fontSize: '14px',
 									color: '#666',
-									marginBottom: '8px',
-									display: 'flex',
-									alignItems: 'center',
-									gap: '8px'
+									lineHeight: '1.6'
 								}}>
-									<span>📊 记忆状态:</span>
+									浏览下方完整内容，完成后点击难度按钮进行评分
 								</div>
-								<table style={{
-									width: '100%',
-									fontSize: '13px',
-									background: '#f6ffed',
-									borderRadius: '4px',
-									borderCollapse: 'collapse'
-								}}>
-									<tbody>
-									{Object.entries(frontmatter)
-										.filter(([key]) => key.startsWith('sr-'))
-										.map(([key, value]) => (
-											<tr key={key}>
-												<td style={{
-													fontWeight: 'bold',
-													padding: '6px 12px',
-													width: '120px',
-													borderBottom: '1px solid #e8e8e8'
-												}}>
-													{key.replace('sr-', '')}
-												</td>
-												<td style={{
-													padding: '6px 12px',
-													borderBottom: '1px solid #e8e8e8'
-												}}>
-													{String(value)}
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
 							</div>
-						)}
-						<div style={{
-							marginBottom: '16px',
-							padding: '12px',
-							background: '#f0f8ff',
-							borderRadius: '6px',
-							fontSize: '13px',
-							color: '#666'
-						}}>
-							<div style={{display: 'flex', justifyContent: 'space-between'}}>
-								<span>📝 内容预览:</span>
-								<span>{fileList.length > 0 ? `进度: ${fileList.findIndex(f => f.index === currentFileIndex) + 1}/${fileList.length}` : ''}</span>
-							</div>
-						</div>
-						<div 
-							ref={mdRef} 
-							style={{
-								overflowY: 'auto',
-								maxHeight: '400px',
-								padding: '16px',
-								border: '1px solid #f0f0f0',
-								borderRadius: '6px',
-								background: '#fff'
-							}}
-						/>
-					</Card>
+							
+							<div 
+								ref={mdRef} 
+								style={{
+									overflowY: 'auto',
+									maxHeight: 'calc(100vh - 400px)',
+									minHeight: '300px',
+									padding: '24px',
+									border: '1px solid #f0f0f0',
+									borderRadius: '12px',
+									background: 'white',
+									boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.04)',
+									position: 'relative',
+									zIndex: 1
+								}}
+							/>
+						</Card>
+					</div>
 				</div>
 			</div>
 			<div style={{
 				position: 'fixed',
-				left: fileList.length > 0 ? '300px' : '0',
+				left: fileList.length > 0 ? '320px' : '0',
 				right: 0,
 				bottom: 0,
 				zIndex: 100,
-				background: 'rgba(255,255,255,0.97)',
-				boxShadow: '0 -2px 8px rgba(0,0,0,0.08)',
-				padding: '16px 0',
+				background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240, 242, 245, 0.98) 100%)',
+				backdropFilter: 'blur(10px)',
+				boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
+				padding: '20px 0',
 				display: 'flex',
 				justifyContent: 'center',
-				transition: 'left 0.3s'
+				alignItems: 'center',
+				transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+				borderTop: '1px solid rgba(24, 144, 255, 0.1)'
 			}}>
-				<Space>
+				<div style={{
+					display: 'flex',
+					alignItems: 'center',
+					gap: '24px',
+					maxWidth: '800px',
+					width: '100%',
+					justifyContent: 'center'
+				}}>
 					<Button
-						style={{marginRight: 30}}
 						onClick={onPrev}
 						disabled={isPrevDisabled}
 						type="default"
 						size="large"
+						style={{
+							minWidth: '120px',
+							height: '48px',
+							fontSize: '16px',
+							fontWeight: '600',
+							borderRadius: '24px',
+							border: '2px solid #1890ff',
+							background: isPrevDisabled ? '#f5f5f5' : 'white',
+							color: isPrevDisabled ? '#bfbfbf' : '#1890ff',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							gap: '8px',
+							boxShadow: '0 4px 12px rgba(24, 144, 255, 0.15)',
+							transition: 'all 0.3s'
+						}}
+						onMouseEnter={(e) => {
+							if (!isPrevDisabled) {
+								e.currentTarget.style.transform = 'translateY(-2px)';
+								e.currentTarget.style.boxShadow = '0 6px 16px rgba(24, 144, 255, 0.25)';
+							}
+						}}
+						onMouseLeave={(e) => {
+							if (!isPrevDisabled) {
+								e.currentTarget.style.transform = 'translateY(0)';
+								e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.15)';
+							}
+						}}
 					>
-						⬅ 上一个
+						<span style={{fontSize: '18px'}}>⬅</span>
+						上一个
 					</Button>
-					<Button 
-						type="primary" 
-						danger 
-						onClick={() => handleDifficulty('hard')}
-						size="large"
-						style={{minWidth: '80px'}}
-					>
-						困难
-					</Button>
+					
+					<div style={{
+						display: 'flex',
+						alignItems: 'center',
+						gap: '16px',
+						background: 'white',
+						padding: '8px',
+						borderRadius: '28px',
+						boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+						border: '1px solid rgba(24, 144, 255, 0.1)'
+					}}>
+						<Button 
+							type="primary" 
+							danger 
+							onClick={() => handleDifficulty('hard')}
+							size="large"
+							style={{
+								minWidth: '100px',
+								height: '48px',
+								fontSize: '16px',
+								fontWeight: '700',
+								borderRadius: '24px',
+								background: 'linear-gradient(135deg, #ff4d4f, #ff7875)',
+								border: 'none',
+								boxShadow: '0 4px 12px rgba(255, 77, 79, 0.3)',
+								transition: 'all 0.3s'
+							}}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.transform = 'translateY(-2px)';
+								e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 77, 79, 0.4)';
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.transform = 'translateY(0)';
+								e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 77, 79, 0.3)';
+							}}
+						>
+							困难
+						</Button>
+						<Button
+							type="default"
+							onClick={() => handleDifficulty('medium')}
+							size="large"
+							style={{
+								minWidth: '100px',
+								height: '48px',
+								fontSize: '16px',
+								fontWeight: '700',
+								borderRadius: '24px',
+								background: 'linear-gradient(135deg, #faad14, #ffc53d)',
+								border: 'none',
+								color: 'white',
+								boxShadow: '0 4px 12px rgba(250, 173, 20, 0.3)',
+								transition: 'all 0.3s'
+							}}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.transform = 'translateY(-2px)';
+								e.currentTarget.style.boxShadow = '0 6px 20px rgba(250, 173, 20, 0.4)';
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.transform = 'translateY(0)';
+								e.currentTarget.style.boxShadow = '0 4px 12px rgba(250, 173, 20, 0.3)';
+							}}
+						>
+							中等
+						</Button>
+						<Button
+							type="primary"
+							onClick={() => handleDifficulty('easy')}
+							size="large"
+							style={{
+								minWidth: '100px',
+								height: '48px',
+								fontSize: '16px',
+								fontWeight: '700',
+								borderRadius: '24px',
+								background: 'linear-gradient(135deg, #52c41a, #73d13d)',
+								border: 'none',
+								boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)',
+								transition: 'all 0.3s'
+							}}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.transform = 'translateY(-2px)';
+								e.currentTarget.style.boxShadow = '0 6px 20px rgba(82, 196, 26, 0.4)';
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.transform = 'translateY(0)';
+								e.currentTarget.style.boxShadow = '0 4px 12px rgba(82, 196, 26, 0.3)';
+							}}
+						>
+							简单
+						</Button>
+					</div>
+					
 					<Button
-						type="default"
-						style={{backgroundColor: '#87CEEB', color: '#000', minWidth: '80px'}}
-						onClick={() => handleDifficulty('medium')}
-						size="large"
-					>
-						中等
-					</Button>
-					<Button
-						type="primary"
-						style={{backgroundColor: '#98FB98', color: '#000', minWidth: '80px'}}
-						onClick={() => handleDifficulty('easy')}
-						size="large"
-					>
-						简单
-					</Button>
-					<Button
-						style={{marginLeft: 30}}
 						onClick={onNext}
 						disabled={isNextDisabled}
 						type="default"
 						size="large"
+						style={{
+							minWidth: '120px',
+							height: '48px',
+							fontSize: '16px',
+							fontWeight: '600',
+							borderRadius: '24px',
+							border: '2px solid #1890ff',
+							background: isNextDisabled ? '#f5f5f5' : 'white',
+							color: isNextDisabled ? '#bfbfbf' : '#1890ff',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							gap: '8px',
+							boxShadow: '0 4px 12px rgba(24, 144, 255, 0.15)',
+							transition: 'all 0.3s'
+						}}
+						onMouseEnter={(e) => {
+							if (!isNextDisabled) {
+								e.currentTarget.style.transform = 'translateY(-2px)';
+								e.currentTarget.style.boxShadow = '0 6px 16px rgba(24, 144, 255, 0.25)';
+							}
+						}}
+						onMouseLeave={(e) => {
+							if (!isNextDisabled) {
+								e.currentTarget.style.transform = 'translateY(0)';
+								e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.15)';
+							}
+						}}
 					>
-						下一个 ➡
+						下一个
+						<span style={{fontSize: '18px'}}>➡</span>
 					</Button>
-				</Space>
+				</div>
 			</div>
 			<Modal
 
