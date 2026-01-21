@@ -159,11 +159,11 @@ const
 
 		const [columns, setColumns] = React.useState<ProColumns<any>[]>([]);
 
-		function parseTableResult(rows: any, params: any): Array<Record<string, any>> {
+		function parseTableResult(rows: any[], params: any): Array<Record<string, any>> {
 			delete params.current;
 			delete params.pageSize;
 
-			const filteredData = rows.filter(item => {
+			const filteredData = rows.filter((item: Record<string, any>) => {
 				return Object.keys(params).every(key => {
 					if (params[key]) {
 						if (item[key]) {

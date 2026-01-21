@@ -26,7 +26,10 @@ export class DashMemoryCardView extends BasesView {
 		// 按 sr-due 升序排序
 		this.sortedCards = [...allCards]
 			.map(function (card) {
-				return {card, due: card.getValue('note.sr-due')};
+				const dueValue = card.getValue('note.sr-due');
+				// Convert Value to string for dayjs
+				const dueString = dueValue?.toString() || '';
+				return {card, due: dueString};
 			})
 			.sort((a, b) => {
 				if (!a.due && !b.due) return 0;
@@ -180,13 +183,18 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
 
 	useEffect(() => {
 		if (mdRef.current && !rendered) {
-			// 修正：传递一个 Obsidian Component 实例，避免内存泄漏
+			// 创建一个简单的组件实例
+			const component = {
+				load: () => {},
+				unload: () => {}
+			};
+			
 			MarkdownRenderer.render(
 				app,
 				markdown,
 				mdRef.current,
 				filePath,
-				null
+				component as any
 			);
 			setRendered(true);
 		}
